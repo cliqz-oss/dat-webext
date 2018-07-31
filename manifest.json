@@ -1,0 +1,31 @@
+{
+    "manifest_version": 2,
+    "name": "hyperext",
+    "version": "0.0.1",
+    "applications": {
+        "gecko": {
+            "id": "hyperext@cliqz.com"
+        }
+    },
+    "background": {
+        "scripts": ["background.js"]
+    },
+    "permissions": [
+    ],
+    "experiment_apis": {
+        "protocol": {
+            "schema": "vendor/libdweb/protocol/protocol.json",
+            "child": {
+                "scopes": ["addon_child"],
+                "paths": [["protocol"]],
+                "script": "vendor/libdweb/protocol/client.js"
+            },
+            "parent": {
+                "events": ["startup"],
+                "scopes": ["addon_parent"],
+                "paths": [["protocol"]],
+                "script": "vendor/libdweb/protocol/host.js"
+            }
+        }
+    }
+}
