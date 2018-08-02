@@ -36,8 +36,13 @@ browser.protocol.registerProtocol('dat', (request) => {
   return protocolHandler.handleRequest(request, { getArchive });
 });
 
+const listenerStreams = new Map();
+let streamCtr = 0;
 const client = 'cliqz@cliqz.com';
-const apiWrapper = new Spanan();
+const apiWrapper = new Spanan((message) => {
+  browser.runtime.sendMessage(client, message);
+});
+const events = apiWrapper.createProxy();
 const api = {
   resolveName(name) {
     return DatArchive.resolveName(name);
@@ -97,6 +102,32 @@ const api = {
     const archive = getArchiveFromUrl(url);
     return archive.rename(oldPath, newPath, opts);
   },
+  watch(url, pattern) {
+    const archive = getArchiveFromUrl(url);
+    const streamId = streamCtr++;
+    const stream = archive.createFileActivityStream(pattern);
+    listenerStreams.set(streamId, stream);
+    return streamId;
+  },
+  addEventListenerToStream(streamId, eventType) {
+    const stream = listenerStreams.get(streamId);
+    const listener = async (evnt) => {
+      const response = await events.pushEvent({
+        stream: streamId,
+        type: eventType,
+        data: evnt,
+      });
+      if (!response) {
+        stream.removeEventListener(response);
+      }
+    }
+    stream.addEventListener(eventType, listener);
+  },
+  closeEventStream(streamId) {
+    const stream = listenerStreams.get(streamId);
+    stream.close();
+    listenerStreams.delete(streamId);
+  }
 };
 global.api = api;
 apiWrapper.export(api, {
