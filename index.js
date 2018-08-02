@@ -73,10 +73,30 @@ const api = {
     const archive = getArchiveFromUrl(url);
     return archive.history(opts);
   },
-  writeFile(url, data, opts) {
+  writeFile(url, path, data, opts) {
     const archive = getArchiveFromUrl(url);
-    return archive.writeFile(data, opts);
-  }
+    return archive.writeFile(path, data, opts);
+  },
+  mkdir(url, path) {
+    const archive = getArchiveFromUrl(url);
+    return archive.mkdir(path);
+  },
+  unlink(url, path) {
+    const archive = getArchiveFromUrl(url);
+    return archive.unlink(path);
+  },
+  rmdir(url, path, opts) {
+    const archive = getArchiveFromUrl(url);
+    return archive.rmdir(path, opts);
+  },
+  copy(url, path, dstPath, opts) {
+    const archive = getArchiveFromUrl(url);
+    return archive.copy(path, dstPath, opts);
+  },
+  rename(url, oldPath, newPath, opts) {
+    const archive = getArchiveFromUrl(url);
+    return archive.rename(oldPath, newPath, opts);
+  },
 };
 global.api = api;
 apiWrapper.export(api, {
@@ -89,7 +109,7 @@ apiWrapper.export(api, {
   respondWithError(error, request) {
     browser.runtime.sendMessage(client, {
       uuid: request.uuid,
-      error,
+      error: error.toString(),
     });
   }
 })
