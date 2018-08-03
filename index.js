@@ -1,16 +1,17 @@
 const randomAccessIdb = require('random-access-idb');
-const ram = require('random-access-memory');
-const parseUrl = require('parse-dat-url');
 const Spanan = require('spanan').default;
 const DatArchive = require('dat-archive-web');
 const DefaultManager = DatArchive.DefaultManager
 const protocolHandler = require('./protocol');
+const DatLibrary = require('./library');
+
+const library = new DatLibrary((key) => randomAccessIdb(key, { idb: global.indexedDB }));
+library.init();
+global.library = library;
 
 class Manager extends DefaultManager {
   getStorage(key) {
-    // return ram;
-    const storage = randomAccessIdb(key, { idb: global.indexedDB });
-    return storage;
+    return library.getStorage(key);
   }
   onAddArchive(key, secretKey, options) {
     console.log('add archive', key, secretKey, options);
@@ -18,19 +19,8 @@ class Manager extends DefaultManager {
 }
 DatArchive.setManager(new Manager('http://localhost:3002'));
 
-const archives = new Map();
-
-function getArchive(addr) {
-  if (!archives.has(addr)) {
-    archives.set(addr, new DatArchive(`dat://${addr}`));
-  }
-  return archives.get(addr);
-}
-
-function getArchiveFromUrl(url) {
-  const { host } = parseUrl(url);
-  return getArchive(host);
-}
+const getArchive = library.getArchive.bind(library);
+const getArchiveFromUrl = library.getArchiveFromUrl.bind(library);
 
 browser.protocol.registerProtocol('dat', (request) => {
   return protocolHandler.handleRequest(request, { getArchive });
@@ -43,6 +33,7 @@ const apiWrapper = new Spanan((message) => {
   browser.runtime.sendMessage(client, message);
 });
 const events = apiWrapper.createProxy();
+
 const api = {
   resolveName(name) {
     return DatArchive.resolveName(name);
@@ -51,66 +42,71 @@ const api = {
     const archive = await DatArchive.create(opts);
     return archive.url;
   },
-  getInfo(url, opts) {
-    const archive = getArchiveFromUrl(url);
+  async getInfo(url, opts) {
+    const archive = await getArchiveFromUrl(url);
     return archive.getInfo(opts);
   },
-  configure(url, opts) {
-    const archive = getArchiveFromUrl(url);
+  async configure(url, opts) {
+    const archive = await getArchiveFromUrl(url);
     return archive.configure(opts);
   },
   async stat(url, path, opts) {
-    const archive = getArchiveFromUrl(url);
+    const archive = await getArchiveFromUrl(url);
     const stat = await archive.stat(path, opts);
     stat._isDirectory = stat.isDirectory();
     stat._isFile = stat.isFile();
     return stat;
   },
-  readFile(url, path, opts) {
-    const archive = getArchiveFromUrl(url);
+  async readFile(url, path, opts) {
+    const archive = await getArchiveFromUrl(url);
     return archive.readFile(path, opts);
   },
-  readdir(url, path, opts) {
-    const archive = getArchiveFromUrl(url);
+  async readdir(url, path, opts) {
+    const archive = await getArchiveFromUrl(url);
     return archive.readdir(path, opts);
   },
-  history(url, opts) {
-    const archive = getArchiveFromUrl(url);
+  async history(url, opts) {
+    const archive = await getArchiveFromUrl(url);
     return archive.history(opts);
   },
-  writeFile(url, path, data, opts) {
-    const archive = getArchiveFromUrl(url);
+  async writeFile(url, path, data, opts) {
+    const archive = await getArchiveFromUrl(url);
     return archive.writeFile(path, data, opts);
   },
-  mkdir(url, path) {
-    const archive = getArchiveFromUrl(url);
+  async mkdir(url, path) {
+    const archive = await getArchiveFromUrl(url);
     return archive.mkdir(path);
   },
-  unlink(url, path) {
-    const archive = getArchiveFromUrl(url);
+  async unlink(url, path) {
+    const archive = await getArchiveFromUrl(url);
     return archive.unlink(path);
   },
-  rmdir(url, path, opts) {
-    const archive = getArchiveFromUrl(url);
+  async rmdir(url, path, opts) {
+    const archive = await getArchiveFromUrl(url);
     return archive.rmdir(path, opts);
   },
-  copy(url, path, dstPath, opts) {
-    const archive = getArchiveFromUrl(url);
+  async copy(url, path, dstPath, opts) {
+    const archive = await getArchiveFromUrl(url);
     return archive.copy(path, dstPath, opts);
   },
-  rename(url, oldPath, newPath, opts) {
-    const archive = getArchiveFromUrl(url);
+  async rename(url, oldPath, newPath, opts) {
+    const archive = await getArchiveFromUrl(url);
     return archive.rename(oldPath, newPath, opts);
   },
-  watch(url, pattern) {
-    const archive = getArchiveFromUrl(url);
+  async watch(url, pattern) {
+    const archive = await getArchiveFromUrl(url);
+    const key = archive._archive.key.toString('hex');
     const streamId = streamCtr++;
     const stream = archive.createFileActivityStream(pattern);
-    listenerStreams.set(streamId, stream);
+    listenerStreams.set(streamId, {
+      stream,
+      key,
+    });
+
     return streamId;
   },
   addEventListenerToStream(streamId, eventType) {
-    const stream = listenerStreams.get(streamId);
+    const { stream } = listenerStreams.get(streamId);
     const listener = async (evnt) => {
       const response = await events.pushEvent({
         stream: streamId,
@@ -124,7 +120,7 @@ const api = {
     stream.addEventListener(eventType, listener);
   },
   closeEventStream(streamId) {
-    const stream = listenerStreams.get(streamId);
+    const { stream } = listenerStreams.get(streamId);
     stream.close();
     listenerStreams.delete(streamId);
   }
@@ -149,3 +145,24 @@ browser.runtime.onMessageExternal.addListener((message) => {
   console.log('recv', message);
   apiWrapper.handleMessage(message);
 });
+
+
+// load my own archives
+library.getArchives().filter(a => a.isOwner).forEach((a) => library.getArchive(a.key));
+
+// manage open archives
+setInterval(() => {
+  const archives = library.getArchives();
+  // get archives which have active listeners
+  const activeStreams = new Set();
+  listenerStreams.forEach(({ key }) => activeStreams.add(key));
+
+  const closeCutoff = Date.now() - (1000 * 60 * 10)
+  archives.filter((a) => a.open && !a.isOwner && !activeStreams.has(a.key) && a.lastUsed < closeCutoff).forEach((a) => {
+    library.closeArchive(a.key);
+  });
+  const calculateUsage = (type) => type ? (type.downloaded / type.length) * type.byteLength : 0;
+  const mb = 1024 * 1024;
+  const usage = archives.map(a => [a.key, (calculateUsage(a.metadata) + calculateUsage(a.content)) / mb]);
+  console.log('data usage', usage);
+}, 60000);

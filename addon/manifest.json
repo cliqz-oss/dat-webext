@@ -11,6 +11,8 @@
         "scripts": ["background.js"]
     },
     "permissions": [
+        "storage",
+        "unlimitedStorage"
     ],
     "experiment_apis": {
         "protocol": {
