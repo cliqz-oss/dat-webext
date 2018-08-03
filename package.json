@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "browserify -r fs:graceful-fs -e index.js > background.js",
-    "start": "env MOZ_DISABLE_CONTENT_SANDBOX=1 web-ext run --firefox=firefoxdeveloperedition --browser-console --url about:debugging",
-    "postinstall": "cp -r node_modules/libdweb/src/protocol vendor/libdweb/"
+    "build": "browserify -r fs:graceful-fs -e index.js > addon/background.js",
+    "start": "env MOZ_DISABLE_CONTENT_SANDBOX=1 web-ext run -s addon --firefox=firefoxdeveloperedition --browser-console --url about:debugging",
+    "postinstall": "mkdir -p addon/libdweb && cp -r node_modules/libdweb/src/protocol addon/libdweb/"
   },
   "author": "",
   "license": "ISC",
@@ -16,7 +16,7 @@
     "browserify": "^16.2.2",
     "dat-archive-web": "git+https://git@github.com/RangerMauve/dat-archive-web",
     "hyperdrive": "^9.14.0",
-    "libdweb": "git+https://git@github.com/mozilla/libdweb.git",
+    "libdweb": "git+https://git@github.com/sammacbeth/libdweb.git#c8aaf40285a6fa5ed6f0f2bf3a0e6de8726ef6f6",
     "parse-dat-url": "^3.0.1",
     "pump": "^3.0.0",
     "random-access-idb": "^1.0.4",

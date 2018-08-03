@@ -1,2 +1,5 @@
 node_modules/
 vendor/
+addon/libdweb
+addon/background.js
+web-ext-artifacts
