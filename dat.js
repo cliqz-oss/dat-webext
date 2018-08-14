@@ -1,6 +1,7 @@
 const Websocket = require('websocket-stream')
 const DatArchiveWeb = require('dat-archive-web');
 const parseUrl = require('parse-dat-url');
+const pump = require('pump');
 
 const datUrlMatcher = /^[0-9a-f]{64}$/;
 
@@ -30,7 +31,6 @@ class Manager extends DefaultManager {
   replicate (key) {
     const gateway = gateways[Math.floor(Math.random() * gateways.length)];
     const proxyURL = `${gateway}/${key}`
-    console.log('xxx', 'proxy url', proxyURL);
     const socket = Websocket(proxyURL)
     return socket
   }
@@ -72,6 +72,39 @@ class Manager extends DefaultManager {
 
 // TODO: override replication
 class DatArchive extends DatArchiveWeb {
+  _replicate () {
+    const archive = this._archive;
+    const key = archive.key.toString('hex');
+
+    const stream = DatArchive._manager.replicate(key)
+
+    pump(stream, archive.replicate({
+      live: true,
+      upload: true
+    }), stream, (err) => {
+      // console.error(err)
+      if (this.closed) {
+        return
+      }
+      if (!this.replicationErrors) {
+        this.replicationErrors = [];
+        this.replicationBackOff = 100;
+      }
+      this.replicationErrors.push(Date.now());
+      if (this.replicationErrors.length > 5) {
+        this.replicationErrors.shift();
+      }
+      if (Date.now() - this.replicationErrors[0] > this.replicationBackOff * 5) {
+        this.replicationBackOff *= 2;
+      }
+      console.log('replication backoff', this.replicationBackOff, this.replicationErrors.length, Date.now() - this.replicationErrors[0]);
+      setTimeout(() => this._replicate(), this.replicationBackOff);
+    })
+
+    this._stream = stream
+
+    return stream
+  }
 }
 
 module.exports = {

@@ -3,6 +3,11 @@ const DatLibrary = require('./library');
 const dat = require('./dat');
 const DatApi = require('./api');
 
+// Once the size of stored archives exceeds this we will start pruning old data
+const CACHE_SIZE_MB = 10;
+// Time to keep seeding archives until closing
+const CLOSE_ARCHIVES_AFTER_MS = 1000 * 60 * 10;
+
 const library = new DatLibrary();
 library.init();
 dat.initManager(library);
@@ -28,7 +33,7 @@ setInterval(() => {
   const activeStreams = new Set();
   api.listenerStreams.forEach(({ key }) => activeStreams.add(key));
 
-  const closeCutoff = Date.now() - (1000 * 60 * 10)
+  const closeCutoff = Date.now() - CLOSE_ARCHIVES_AFTER_MS
   archives.filter((a) => a.open && !a.isOwner && !activeStreams.has(a.key) && a.lastUsed < closeCutoff).forEach((a) => {
     library.closeArchive(a.key);
   });
@@ -40,7 +45,7 @@ setInterval(() => {
   const totalUsage = usage.reduce((acc, a) => acc + (a[1] || 0), 0);
   console.log('data usage', usage, totalUsage);
   // prune data
-  if (totalUsage > 10) {
+  if (totalUsage > CACHE_SIZE_MB) {
     const pruneable = archives
       .filter(a => !a.open && !a.isOwner && !activeStreams.has(a.key))
       .sort((a, b) => a.lastUsed - b.lastUsed);
