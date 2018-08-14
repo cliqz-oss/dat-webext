@@ -59,6 +59,15 @@ module.exports = class DatLibrary {
     }
   }
 
+  async deleteArchive(key) {
+    if (this.openArchives.has(key)) {
+      throw 'Cannot delete an open archive';
+    }
+    global.indexedDB.deleteDatabase(key);
+    delete this.archives[key];
+    return this._persistArchives();
+  }
+
   async _addLibraryEntry(archive) {
     const key = archive._archive.key.toString('hex');
     if (!this.archives[key]) {
