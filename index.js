@@ -34,13 +34,15 @@ setInterval(() => {
   });
   const calculateUsage = (type) => type ? (type.downloaded / type.length) * type.byteLength : 0;
   const mb = 1024 * 1024;
-  const usage = archives.map(a => [a.key, (calculateUsage(a.metadata) + calculateUsage(a.content)) / mb]);
+  const usage = archives
+    .filter(a => !a.isOwner)
+    .map(a => [a.key, (calculateUsage(a.metadata) + calculateUsage(a.content)) / mb]);
   const totalUsage = usage.reduce((acc, a) => acc + (a[1] || 0), 0);
   console.log('data usage', usage, totalUsage);
   // prune data
   if (totalUsage > 10) {
     const pruneable = archives
-      .filter((a) => !a.open && !a.isOwner && !activeStreams.has(a.key))
+      .filter(a => !a.open && !a.isOwner && !activeStreams.has(a.key))
       .sort((a, b) => a.lastUsed - b.lastUsed);
     console.log('over limit', pruneable);
     if (pruneable.length > 0) {
