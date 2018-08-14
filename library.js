@@ -1,5 +1,5 @@
 const parseUrl = require('parse-dat-url');
-const DatArchive = require('dat-archive-web');
+const DatArchive = require('./dat').DatArchive;
 
 const ARCHIVE_LIST_KEY = 'archives';
 

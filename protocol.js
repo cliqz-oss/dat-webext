@@ -63,11 +63,12 @@ function responseText(string) {
 module.exports = {
   handleRequest(request, { getArchive }) {
     const { host, pathname, version, search } = parseUrl(request.url);
-    const archive = getArchive(host);
+    let filePath = decodeURIComponent(pathname);
     return {
+      contentType: filePath.endsWith('.svg') ? 'image/svg+xml' : undefined,
       content: (async function* () {
+        const archive = await getArchive(host);
         try {
-          let filePath = pathname;
           let isFolder = filePath.endsWith('/');
           const manifest = await pda.readManifest(archive._archive).catch(_ => { });
 
@@ -141,6 +142,7 @@ module.exports = {
             yield next.buffer;
           }
         } catch (e) {
+          console.error(`handler error: ${request}`, e);
           yield responseText(`Error: ${e}`);
         }
       })()

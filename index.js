@@ -1,23 +1,14 @@
 const randomAccessIdb = require('random-access-idb');
 const Spanan = require('spanan').default;
-const DatArchive = require('dat-archive-web');
-const DefaultManager = DatArchive.DefaultManager
 const protocolHandler = require('./protocol');
 const DatLibrary = require('./library');
+const dat = require('./dat');
+const DatArchive = dat.DatArchive;
 
 const library = new DatLibrary((key) => randomAccessIdb(key, { idb: global.indexedDB }));
 library.init();
+dat.initManager(library);
 global.library = library;
-
-class Manager extends DefaultManager {
-  getStorage(key) {
-    return library.getStorage(key);
-  }
-  onAddArchive(key, secretKey, options) {
-    console.log('add archive', key, secretKey, options);
-  }
-}
-DatArchive.setManager(new Manager('http://localhost:3002'));
 
 const getArchive = library.getArchive.bind(library);
 const getArchiveFromUrl = library.getArchiveFromUrl.bind(library);
@@ -40,6 +31,10 @@ const api = {
   },
   async create(opts) {
     const archive = await DatArchive.create(opts);
+    return archive.url;
+  },
+  async fork(url, opts) {
+    const archive = await DatArchive.fork(url, opts);
     return archive.url;
   },
   async getInfo(url, opts) {
