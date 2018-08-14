@@ -1,11 +1,10 @@
-const randomAccessIdb = require('random-access-idb');
 const Spanan = require('spanan').default;
 const protocolHandler = require('./protocol');
 const DatLibrary = require('./library');
 const dat = require('./dat');
 const DatArchive = dat.DatArchive;
 
-const library = new DatLibrary((key) => randomAccessIdb(key, { idb: global.indexedDB }));
+const library = new DatLibrary();
 library.init();
 dat.initManager(library);
 global.library = library;

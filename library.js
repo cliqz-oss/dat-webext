@@ -1,3 +1,4 @@
+const randomAccessIdb = require('random-access-idb');
 const parseUrl = require('parse-dat-url');
 const DatArchive = require('./dat').DatArchive;
 
@@ -5,12 +6,15 @@ const ARCHIVE_LIST_KEY = 'archives';
 
 module.exports = class DatLibrary {
 
-  constructor(hyperdriveStorage) {
-    this.getStorage = hyperdriveStorage;
+  constructor() {
     this.openArchives = new Map();
     this.storageLock = Promise.resolve();
     this.archives = {};
     this.nameCache = new Map();
+  }
+
+  async getStorage(key) {
+    return randomAccessIdb(key, { idb: global.indexedDB })
   }
 
   async init() {

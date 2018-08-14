@@ -19,8 +19,8 @@ class Manager extends DefaultManager {
     this.lookupCache = new Map();
   }
 
-  async getStorage(key) {
-    return this.library.getStorage(key);
+  async getStorage(key, secretKey) {
+    return this.library.getStorage(key, secretKey);
   }
 
   onAddArchive(key, secretKey, options) {
