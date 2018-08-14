@@ -17,6 +17,7 @@
     "dat-archive-web": "git+https://git@github.com/RangerMauve/dat-archive-web",
     "hyperdrive": "^9.14.0",
     "libdweb": "git+https://git@github.com/sammacbeth/libdweb.git#c8aaf40285a6fa5ed6f0f2bf3a0e6de8726ef6f6",
+    "mime": "^2.3.1",
     "parse-dat-url": "^3.0.1",
     "pump": "^3.0.0",
     "random-access-idb": "^1.0.4",

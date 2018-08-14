@@ -1,6 +1,7 @@
 const parseUrl = require('parse-dat-url');
 const pda = require('pauls-dat-api');
 const joinPaths = require('path').join;
+const mime = require('mime');
 
 class StreamIterator {
   constructor(stream) {
@@ -65,7 +66,7 @@ module.exports = {
     const { host, pathname, version, search } = parseUrl(request.url);
     let filePath = decodeURIComponent(pathname);
     return {
-      contentType: filePath.endsWith('.svg') ? 'image/svg+xml' : undefined,
+      contentType: mime.getType(filePath) || undefined,
       content: (async function* () {
         const archive = await getArchive(host);
         try {
