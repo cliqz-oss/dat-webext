@@ -50,4 +50,4 @@ setInterval(() => {
       library.deleteArchive(pruneable[0].key);
     }
   }
-}, 10000);
+}, 60000);
