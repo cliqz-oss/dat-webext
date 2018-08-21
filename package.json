@@ -14,7 +14,7 @@
   "dependencies": {
     "base64-js": "^1.3.0",
     "browserify": "^16.2.2",
-    "dat-archive-web": "git+https://git@github.com/RangerMauve/dat-archive-web",
+    "dat-archive-web": "git+https://git@github.com/sammacbeth/dat-archive-web.git#49699f3cdb7a0fb8de006ef833ec5adafd8c6fe7",
     "hyperdrive": "^9.14.0",
     "libdweb": "git+https://git@github.com/sammacbeth/libdweb.git#c8aaf40285a6fa5ed6f0f2bf3a0e6de8726ef6f6",
     "mime": "^2.3.1",

@@ -6,8 +6,9 @@ const pump = require('pump');
 const datUrlMatcher = /^[0-9a-f]{64}$/;
 
 const gateways = [
+  'wss://dat-gateway.now.sh',
   'ws://macbeth.cc:3000',
-  'ws://gateway.mauve.moe:3000',
+  // 'ws://gateway.mauve.moe:3000',
   'wss://pamphlets.me',
 ];
 
@@ -15,7 +16,8 @@ const DefaultManager = DatArchiveWeb.DefaultManager;
 
 class Manager extends DefaultManager {
   constructor(library) {
-    super(gateways[0]);
+    super(gateways[0].replace('wss:', 'https:').replace('ws:', 'http:'));
+    this.port = 443;
     this.library = library;
     this.lookupCache = new Map();
   }
