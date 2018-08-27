@@ -1,16 +1,15 @@
 {
-  "name": "hyperext",
-  "version": "1.0.0",
+  "name": "dat-webext",
+  "version": "0.0.1",
   "description": "",
-  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "browserify -r fs:graceful-fs -e index.js > addon/background.js",
     "start": "env MOZ_DISABLE_CONTENT_SANDBOX=1 web-ext run -s addon --firefox=firefoxdeveloperedition --browser-console --url about:debugging",
     "postinstall": "mkdir -p addon/libdweb && cp -r node_modules/libdweb/src/protocol addon/libdweb/"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Sam Macbeth",
+  "license": "MIT",
   "dependencies": {
     "base64-js": "^1.3.0",
     "browserify": "^16.2.2",

@@ -70,7 +70,6 @@ class Manager extends DefaultManager {
   }
 }
 
-// TODO: override replication
 class DatArchive extends DatArchiveWeb {
   _replicate () {
     const archive = this._archive;

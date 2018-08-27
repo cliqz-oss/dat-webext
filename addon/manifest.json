@@ -1,6 +1,6 @@
 {
     "manifest_version": 2,
-    "name": "dat",
+    "name": "Dat Protocol",
     "version": "0.0.1",
     "applications": {
         "gecko": {
