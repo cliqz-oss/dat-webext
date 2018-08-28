@@ -4,11 +4,18 @@ ChromeUtils.import('resource://gre/modules/Services.jsm');
 const processScriptUrl = new URL(`./process-script.js?now=${Date.now()}`, Components.stack.filename)
 
 this.processScript = class extends ExtensionAPI {
+  constructor(extension) {
+    super(extension);
+    this.processes = new Set();
+  }
 
   onShutdown(reason) {
+    console.log('[process-script] onShutdown');
     // send shutdown
-    Services.ppmm.removeMessageListener('dat-webext', this.onMessage);
-    this.processes.forEach(() => {
+    if (this.onMessage) {
+      Services.ppmm.removeMessageListener('dat-webext', this.onMessage);
+    }
+    this.processes.forEach((pid) => {
       Services.ppmm.broadcastAsyncMessage(`process-${pid}`, {
         action: 'shutdown',
       });
@@ -18,7 +25,6 @@ this.processScript = class extends ExtensionAPI {
 
   getAPI(context) {
     const self = this;
-    this.processes = new Set();
     const send = (channel, msg) => Services.ppmm.broadcastAsyncMessage(channel, msg);
     this.onMessage = ({data}) => {
       if (data.action === 'notifyProcessInit') {
@@ -32,6 +38,8 @@ this.processScript = class extends ExtensionAPI {
     }
     Services.ppmm.loadProcessScript(processScriptUrl, true);
     Services.ppmm.addMessageListener('dat-webext', this.onMessage);
+
+    console.log('xxx', context);
 
     return {
       processScript: {

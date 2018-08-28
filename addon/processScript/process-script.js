@@ -86,7 +86,7 @@ const DocumentManager = {
   },
 
   uninit() {
-    // forEachTab(this.cleanup.bind(this));
+    forEachTab(this.cleanup.bind(this));
     Services.obs.removeObserver(this, 'document-element-inserted');
   },
 
@@ -95,8 +95,7 @@ const DocumentManager = {
     if (!isDatPage(document, window)) {
       return;
     }
-    const unsafeWindow = Components.utils.waiveXrays(window);
-    unsafeWindow.removeEventListener('message', this._onMessage);
+    window.removeEventListener('message', this._onMessage);
   },
 
   onMessage({ data }) {
@@ -131,7 +130,7 @@ const onMessage = ({ data }) => {
     DocumentManager.init();
   } else if (data.action === 'shutdown') {
     console.log('[process-script] got shutdown');
-    DocumentManager.unload();
+    DocumentManager.uninit();
     removeMessageListener(`process-${processId}`, onMessage);
   } else {
     data.source = 'dat-api-response';
