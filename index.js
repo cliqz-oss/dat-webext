@@ -3,6 +3,15 @@ const DatLibrary = require('./library');
 const dat = require('./dat');
 const DatApi = require('./api');
 
+browser.processScript.setAPIScript(browser.runtime.getURL('dat-api.js'));
+
+browser.runtime.onMessage.addListener((msg) => {
+  console.log('xxx int msg', msg);
+  if (msg.source === 'DATAPI') {
+    browser.processScript.sendMessage({ action: 'pong', source: 'DATBG' });
+  }
+});
+
 // Once the size of stored archives exceeds this we will start pruning old data
 const CACHE_SIZE_MB = 10;
 // Time to keep seeding archives until closing
