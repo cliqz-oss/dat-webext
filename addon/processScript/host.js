@@ -23,6 +23,7 @@ this.processScript = class extends ExtensionAPI {
     this.onMessage = ({data}) => {
       if (data.action === 'notifyProcessInit') {
         const pid = data.args[0];
+        console.log('[process-script] registered process-script', pid);
         this.processes.add(pid);
         if (this.scriptUrl) {
           send(`process-${pid}`, { action: 'setScriptUrl', url: this.scriptUrl });
@@ -35,7 +36,6 @@ this.processScript = class extends ExtensionAPI {
     return {
       processScript: {
         setAPIScript: (url) => {
-          console.log('xxx setAPIScript');
           self.scriptUrl = url;
           this.processes.forEach((pid) => {
             send(`process-${pid}`, { action: 'setScriptUrl', url: this.scriptUrl });

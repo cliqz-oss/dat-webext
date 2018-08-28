@@ -3,14 +3,7 @@ const DatLibrary = require('./library');
 const dat = require('./dat');
 const DatApi = require('./api');
 
-browser.processScript.setAPIScript(browser.runtime.getURL('dat-api.js'));
-
-browser.runtime.onMessage.addListener((msg) => {
-  console.log('xxx int msg', msg);
-  if (msg.source === 'DATAPI') {
-    browser.processScript.sendMessage({ action: 'pong', source: 'DATBG' });
-  }
-});
+browser.processScript.setAPIScript(browser.runtime.getURL('web-api.js'));
 
 // Once the size of stored archives exceeds this we will start pruning old data
 const CACHE_SIZE_MB = 10;
@@ -29,7 +22,7 @@ browser.protocol.registerProtocol('dat', (request) => {
   return protocolHandler.handleRequest(request, { getArchive });
 });
 
-const api = new DatApi('cliqz@cliqz.com', getArchiveFromUrl);
+const api = new DatApi(getArchiveFromUrl);
 global.api = api;
 
 // load my own archives

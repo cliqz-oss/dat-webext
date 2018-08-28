@@ -100,8 +100,7 @@ const DocumentManager = {
   },
 
   onMessage({ data }) {
-    if (data.source === 'DATAPI') {
-      console.log('xxx1', data);
+    if (data.source === 'dat-api') {
       sendToBackground(data);
     }
   },
@@ -131,10 +130,11 @@ const onMessage = ({ data }) => {
     WEB_API_URL = data.url;
     DocumentManager.init();
   } else if (data.action === 'shutdown') {
-    console.log('xxx got shutdown');
+    console.log('[process-script] got shutdown');
     DocumentManager.unload();
     removeMessageListener(`process-${processId}`, onMessage);
-  } else if (data.source === 'DATBG') {
+  } else {
+    data.source = 'dat-api-response';
     forEachTab((document) => {
       const window = document && document.defaultView;
       if (!isDatPage(document, window)) {

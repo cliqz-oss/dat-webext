@@ -2,12 +2,12 @@ const Spanan = require('spanan').default;
 const DatArchive = require('./dat').DatArchive;
 
 class DatApi {
-  constructor(client, getArchiveFromUrl) {
+  constructor(getArchiveFromUrl) {
     this.listenerStreams = new Map();
     const listenerStreams = this.listenerStreams
     let streamCtr = 0;
     const apiWrapper = new Spanan((message) => {
-      browser.runtime.sendMessage(client, message);
+      browser.processScript.sendMessage(message);
     });
     const events = apiWrapper.createProxy();
 
@@ -109,20 +109,20 @@ class DatApi {
 
     apiWrapper.export(this.api, {
       respond(response, request) {
-        browser.runtime.sendMessage(client, {
+        browser.processScript.sendMessage({
           uuid: request.uuid,
           response,
         });
       },
       respondWithError(error, request) {
-        browser.runtime.sendMessage(client, {
+        browser.processScript.sendMessage({
           uuid: request.uuid,
           error: error.toString(),
         });
       }
     })
 
-    browser.runtime.onMessageExternal.addListener((message) => {
+    browser.runtime.onMessage.addListener((message) => {
       console.log('recv', message);
       apiWrapper.handleMessage(message);
     });
