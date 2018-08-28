@@ -34,7 +34,7 @@ module.exports = function (rpc, eventBus) {
 
     close() {
       this.getId.then(id => rpc.closeEventStream(id));
-      eventBus.unsubscribe('event', this.onEvent);
+      eventBus.removeListener('event', this.onEvent);
     }
   }
 
