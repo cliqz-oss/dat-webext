@@ -39,8 +39,6 @@ this.processScript = class extends ExtensionAPI {
     Services.ppmm.loadProcessScript(processScriptUrl, true);
     Services.ppmm.addMessageListener('dat-webext', this.onMessage);
 
-    console.log('xxx', context);
-
     return {
       processScript: {
         setAPIScript: (url) => {
