@@ -1,4 +1,4 @@
-const disc = require('discovery-swarm');
+const disc = require('@sammacbeth/discovery-swarm');
 const protocol = require('hypercore-protocol');
 
 class MultiSwarm {
