@@ -1,12 +1,24 @@
-const Websocket = require('websocket-stream')
 const DatArchiveWeb = require('dat-archive-web');
-const pump = require('pump');
+const DatGatewayIntroducer = require('discovery-swarm/web/dat-gateway');
 const resolveName = require('./dns');
+const Swarm = require('./network');
 
 const gateways = [
-  'wss://dat-gateway.now.sh',
+  'ws://localhost:3000',
   'ws://macbeth.cc:3000',
 ];
+
+const swarmConfig = {
+  sparse: true,
+  introducers: [
+    new DatGatewayIntroducer(gateways),
+  ],
+  transport: {
+  },
+}
+
+const swarm = new Swarm(swarmConfig);
+swarm.listen();
 
 const DefaultManager = DatArchiveWeb.DefaultManager;
 
@@ -40,41 +52,16 @@ class Manager extends DefaultManager {
 
 class DatArchive extends DatArchiveWeb {
   _replicate () {
-    const archive = this._archive;
-    const key = archive.key.toString('hex');
-
-    const stream = DatArchive._manager.replicate(key)
-
-    pump(stream, archive.replicate({
-      live: true,
-      upload: true
-    }), stream, (err) => {
-      // console.error(err)
-      if (this.closed) {
-        return
-      }
-      if (!this.replicationErrors) {
-        this.replicationErrors = [];
-        this.replicationBackOff = 100;
-      }
-      this.replicationErrors.push(Date.now());
-      if (this.replicationErrors.length > 5) {
-        this.replicationErrors.shift();
-      }
-      if (Date.now() - this.replicationErrors[0] > this.replicationBackOff * 5) {
-        this.replicationBackOff *= 2;
-      }
-      console.log('replication backoff', this.replicationBackOff, this.replicationErrors.length, Date.now() - this.replicationErrors[0]);
-      setTimeout(() => this._replicate(), this.replicationBackOff);
-    })
-
-    this._stream = stream
-
-    return stream
+    swarm.add(this._archive);
   }
 
   static async resolveName(url) {
     return resolveName(url);
+  }
+
+  close() {
+    super.close();
+    swarm.remove(this._archive);
   }
 }
 

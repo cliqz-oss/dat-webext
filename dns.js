@@ -3,7 +3,7 @@ const parseUrl = require('parse-dat-url');
 const datUrlMatcher = /^[0-9a-f]{64}$/;
 const lookupCache = new Map();
 
-const proxyUrl = 'https://dat-gateway-niqwyeuxyi.now.sh';
+const proxyUrl = 'http://macbeth.cc:3000';
 
 module.exports = async function resolve(url) {
   const { host } = parseUrl(url);
