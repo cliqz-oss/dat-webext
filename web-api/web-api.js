@@ -10,6 +10,7 @@ const wrapper = new Spanan((_message) => {
 });
 // the eventBus is a multiplexer for incoming events from background
 const eventBus = new events.EventEmitter();
+eventBus.setMaxListeners(100);
 wrapper.export({
   pushEvent(event) {
     eventBus.emit('event', event);

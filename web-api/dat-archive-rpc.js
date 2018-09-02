@@ -89,6 +89,10 @@ module.exports = function (rpc, eventBus) {
       return rpc.resolveName(name);
     }
 
+    static async load(url) {
+      return rpc.load(url).then(() => new DatArchive(url));
+    }
+
     async getInfo(opts) {
       return rpc.getInfo(this.url, opts);
     }

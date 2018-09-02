@@ -23,6 +23,11 @@ class DatApi {
         const archive = await DatArchive.fork(url, opts);
         return archive.url;
       },
+      async load(url) {
+        const archive = await getArchiveFromUrl(url);
+        await archive._loadPromise;
+        return url;
+      },
       async getInfo(url, opts) {
         const archive = await getArchiveFromUrl(url);
         return archive.getInfo(opts);
