@@ -6,8 +6,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "browserify -r fs:graceful-fs -e index.js > addon/background.js",
     "build:webapi": "browserify -e ./web-api/web-api.js > addon/web-api.js",
-    "start": "env MOZ_DISABLE_CONTENT_SANDBOX=1 web-ext run -s addon --firefox=firefoxdeveloperedition --browser-console --url about:debugging",
-    "postinstall": "mkdir -p addon/libdweb && cp -r node_modules/libdweb/src/protocol addon/libdweb/"
+    "start": "env MOZ_DISABLE_CONTENT_SANDBOX=1 web-ext run -s addon --firefox=firefoxdeveloperedition --browser-console --no-reload",
+    "postinstall": "mkdir -p addon/libdweb && cp -r node_modules/libdweb/src/* addon/libdweb/"
   },
   "author": "Sam Macbeth",
   "license": "MIT",

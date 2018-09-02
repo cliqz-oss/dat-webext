@@ -1,19 +1,21 @@
 const DatArchiveWeb = require('dat-archive-web');
 const DatGatewayIntroducer = require('discovery-swarm/web/dat-gateway');
+const TCPTransport = require('discovery-swarm/webext/tcp-transport');
+const LanDiscovery = require('discovery-swarm/webext/service-discovery');
 const resolveName = require('./dns');
 const Swarm = require('./network');
 
 const gateways = [
-  'ws://localhost:3000',
   'ws://macbeth.cc:3000',
 ];
 
 const swarmConfig = {
   sparse: true,
   introducers: [
-    new DatGatewayIntroducer(gateways),
+    new LanDiscovery(),
   ],
   transport: {
+    tcp: new TCPTransport(),
   },
 }
 
