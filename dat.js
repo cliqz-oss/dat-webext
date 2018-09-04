@@ -10,6 +10,7 @@ const gateways = [
 ];
 
 const swarmConfig = {
+  debug: true,
   sparse: true,
   introducers: [
     new DatGatewayIntroducer(gateways),
@@ -63,7 +64,7 @@ class DatArchive extends DatArchiveWeb {
   }
 
   close() {
-    super.close();
+    this.closed = true;
     swarm.remove(this._archive);
   }
 }
