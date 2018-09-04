@@ -10,7 +10,6 @@ module.exports = class DatLibrary {
     this.openArchives = new Map();
     this.storageLock = Promise.resolve();
     this.archives = {};
-    this.nameCache = new Map();
   }
 
   async getStorage(key) {
@@ -92,16 +91,8 @@ module.exports = class DatLibrary {
     }
   }
 
-  async _resolveName(name) {
-    if (!this.nameCache.has(name)) {
-      const addr = await DatArchive.resolveName(`dat://${name}`);
-      this.nameCache.set(name, addr);
-    }
-    return this.nameCache.get(name);
-  }
-
   async getArchive(addr) {
-    const key = await this._resolveName(addr);
+    const key = await DatArchive.resolveName(`dat://${addr}`);
     let archive;
 
     if (!this.openArchives.has(key)) {

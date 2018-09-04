@@ -28,6 +28,14 @@
                 "paths": [["protocol"]],
                 "script": "libdweb/protocol/host.js"
             }
+        },
+        "processScript": {
+            "schema": "processScript/schema.json",
+            "parent": {
+                "scopes": ["addon_parent"],
+                "paths": [["processScript"]],
+                "script": "processScript/host.js"
+            }
         }
     }
 }
