@@ -48,14 +48,14 @@ class Manager extends DefaultManager {
   }
 
   replicate (key) {
-    const gateway = gateways[Math.floor(Math.random() * gateways.length)];
-    const proxyURL = `${gateway}/${key}`
-    const socket = Websocket(proxyURL)
-    return socket
   }
 
   async resolveName(url) {
     return resolveName(url);
+  }
+
+  construct(args) {
+    return new DatArchive(args);
   }
 
 }
