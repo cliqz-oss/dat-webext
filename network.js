@@ -19,7 +19,6 @@ class MultiSwarm {
     const key = archive.discoveryKey.toString('hex');
     this.archives.set(key, archive);
     this.swarm.join(archive.discoveryKey, {
-      announce: false,
       key: archive.key,
     });
   }
@@ -32,8 +31,8 @@ class MultiSwarm {
 
   replicate(opts) {
     const stream = protocol({
-      live: true, 
-      id: this.swarm.id, 
+      live: true,
+      id: this.swarm.id,
       encrypt: true
     });
 
@@ -44,10 +43,8 @@ class MultiSwarm {
       }
       const archive = this.archives.get(key);
       archive.replicate({
-        stream,
         live: true,
-        upload: true,
-        download: true,
+        stream,
       });
     };
 
@@ -57,6 +54,10 @@ class MultiSwarm {
     }
 
     return stream;
+  }
+
+  destroy() {
+    this.swarm.destroy();
   }
 }
 

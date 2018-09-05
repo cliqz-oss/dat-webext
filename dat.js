@@ -2,11 +2,13 @@ const DatArchiveWeb = require('dat-archive-web');
 const DatGatewayIntroducer = require('@sammacbeth/discovery-swarm/web/dat-gateway');
 const TCPTransport = require('@sammacbeth/discovery-swarm/webext/tcp-transport');
 const LanDiscovery = require('@sammacbeth/discovery-swarm/webext/service-discovery');
+const PeerDiscovery = require('@sammacbeth/discovery-swarm/web/peer-discovery');
 const resolveName = require('./dns');
 const Swarm = require('./network');
 
 const gateways = [
   'ws://macbeth.cc:3000',
+  'ws://gateway.mauve.moe:3000',
 ];
 
 const swarmConfig = {
@@ -15,6 +17,7 @@ const swarmConfig = {
   introducers: [
     new DatGatewayIntroducer(gateways),
     new LanDiscovery({ announce: true }),
+    new PeerDiscovery('https://discovery-server-ljfbfatalr.now.sh'),
   ],
   transport: {
     tcp: new TCPTransport(),
@@ -23,6 +26,9 @@ const swarmConfig = {
 
 const swarm = new Swarm(swarmConfig);
 swarm.listen();
+window.addEventListener('unload', () => {
+  swarm.destroy();
+});
 
 const DefaultManager = DatArchiveWeb.DefaultManager;
 
@@ -66,6 +72,7 @@ class DatArchive extends DatArchiveWeb {
   close() {
     this.closed = true;
     swarm.remove(this._archive);
+    this._archive.close();
   }
 }
 
