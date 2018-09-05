@@ -1,4 +1,4 @@
-const DatArchiveWeb = require('dat-archive-web');
+const DatArchiveWeb = require('@sammacbeth/dat-archive-web');
 const DatGatewayIntroducer = require('@sammacbeth/discovery-swarm/web/dat-gateway');
 const TCPTransport = require('@sammacbeth/discovery-swarm/webext/tcp-transport');
 const LanDiscovery = require('@sammacbeth/discovery-swarm/webext/service-discovery');
