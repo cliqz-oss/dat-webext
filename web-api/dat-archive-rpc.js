@@ -74,7 +74,7 @@ module.exports = function (rpc, eventBus) {
     }
 
     static async create(opts) {
-      return rpc.create({ opts }).then(url => new DatArchive(url));
+      return rpc.create(opts).then(url => new DatArchive(url));
     }
 
     static async fork(url, opts) {

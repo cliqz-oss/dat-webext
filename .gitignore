@@ -1,6 +1,6 @@
 node_modules/
-vendor/
 addon/libdweb
+addon/assets
 addon/background.js
 addon/web-api.js
 web-ext-artifacts
