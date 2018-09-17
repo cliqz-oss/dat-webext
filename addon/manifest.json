@@ -36,6 +36,27 @@
                 "paths": [["processScript"]],
                 "script": "processScript/host.js"
             }
+        },
+        "TCPSocket": {
+            "schema": "libdweb/TCPSocket/TCPSocket.json",
+            "child": {
+                "scopes": ["addon_child"],
+                "paths": [["TCPSocket"]],
+                "script": "libdweb/TCPSocket/Socket.js"
+            }
+        },
+        "ServiceDiscovery": {
+            "schema": "libdweb/ServiceDiscovery/ServiceDiscovery.json",
+            "child": {
+                "scopes": ["addon_child"],
+                "paths": [["ServiceDiscovery"]],
+                "script": "libdweb/ServiceDiscovery/client.js"
+            },
+            "parent": {
+                "scopes": ["addon_parent"],
+                "paths": [["ServiceDiscovery"]],
+                "script": "libdweb/ServiceDiscovery/host.js"
+            }
         }
     }
 }
