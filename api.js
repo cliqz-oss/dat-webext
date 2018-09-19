@@ -92,7 +92,16 @@ class DatApi {
       },
       async readdir(url, path, opts) {
         const archive = await getArchiveFromUrl(url);
-        return archive.readdir(path, opts);
+        const listing = await archive.readdir(path, opts);
+        if (opts && opts.stat) {
+          // serialise stat
+          return listing.map(({ name, stat }) => {
+            stat._isDirectory = stat.isDirectory();
+            stat._isFile = stat.isFile();
+            return { name, stat };
+          });
+        }
+        return listing;
       },
       async history(url, opts) {
         const archive = await getArchiveFromUrl(url);
