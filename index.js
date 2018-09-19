@@ -16,13 +16,12 @@ dat.initManager(library);
 global.library = library;
 
 const getArchive = library.getArchive.bind(library);
-const getArchiveFromUrl = library.getArchiveFromUrl.bind(library);
 
 browser.protocol.registerProtocol('dat', (request) => {
   return protocolHandler.handleRequest(request, { getArchive });
 });
 
-const api = new DatApi(getArchiveFromUrl);
+const api = new DatApi(library);
 global.api = api;
 
 // load my own archives
@@ -30,7 +29,7 @@ library.getArchives().filter(a => a.isOwner).forEach((a) => library.getArchive(a
 
 // manage open archives
 setInterval(() => {
-  const archives = library.getArchives();
+  const archives = library.getArchives().map((key) => library.getArchiveState(key));
   // get archives which have active listeners
   const activeStreams = new Set();
   api.listenerStreams.forEach(({ key }) => activeStreams.add(key));

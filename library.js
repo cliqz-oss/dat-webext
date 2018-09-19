@@ -45,9 +45,11 @@ module.exports = class DatLibrary {
   }
 
   getArchives() {
-    const archiveList = Object.keys(this.archives).map((key) => this.getArchiveState(key));
-    this._persistArchives();
-    return archiveList;
+    return Object.values(this.archives);
+  }
+
+  getLibraryArchives() {
+    return this.getArchives().filter(({ inLibrary }) => inLibrary);
   }
 
   closeArchive(key) {
@@ -75,9 +77,16 @@ module.exports = class DatLibrary {
         created: Date.now(),
         lastUsed: Date.now(),
         isOwner: archive._archive.writable,
+        inLibrary: archive._archive.writable,
       };
+      try {
+        const { title, description, type } = await archive.getInfo({ timeout: 30000 });
+        this.archives[key].title = title;
+        this.archives[key].description = description;
+        this.archives[key].type = type;
+      } catch(e) {
+      }
       this._persistArchives();
-      console.log('xxx', this.archives);
     }
   }
 

@@ -3,7 +3,8 @@ const DatArchive = require('./dat').DatArchive;
 const dialog = require('./dialog');
 
 class DatApi {
-  constructor(getArchiveFromUrl) {
+  constructor(library) {
+    const getArchiveFromUrl = library.getArchiveFromUrl.bind(library);
     this.listenerStreams = new Map();
     const listenerStreams = this.listenerStreams
     let streamCtr = 0;
@@ -26,7 +27,10 @@ class DatApi {
       },
       async getArchive(url) {
         return await getArchiveFromUrl(url);
-      }
+      },
+      async listLibrary(filters) {
+        return library.getLibraryArchives();
+      },
     }
 
     this.api = {
@@ -49,6 +53,16 @@ class DatApi {
             url,
             title: opts.title,
             description: opts.description,
+          }
+        });
+      },
+      async selectArchive(opts = {}) {
+        return await dialog.open({
+          action: 'selectArchive',
+          opts: {
+            title: opts.title,
+            buttonLabel: opts.buttonLabel,
+            filters: opts.filters,
           }
         });
       },

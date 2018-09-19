@@ -89,24 +89,21 @@ async function setupForm() {
       });
     }, 'fork-form', 'fork-submit');
   } else if (action === 'selectArchive') {
-    const library = await bridge.api.listLibrary();
+    const library = await api.privateApi.listLibrary(opts.filters);
     const archiveList = document.getElementById('archives');
-    library.forEach(async ({ url, dir }) => {
-      const archive = new DatArchive(url);
-      const { title, description } = await archive.getInfo();
+    library.forEach(async ({ key, title, description }) => {
       const template = document.createElement('template');
       template.innerHTML = `<a class="list-group-item list-group-item-action flex-column align-items-start" href="#">
-                <h5>${title}</h5>
-                <small>${dir}</small>
+                <h5>${title || 'unnamed'}</h5>
+                <small>dat://${key.substring(0, 5)}...${key.substring(60)}</small>
                 <p>${description || ''}</p>
             </a>`;
       const elem = template.content.firstChild;
       archiveList.appendChild(elem);
       elem.onclick = () => {
-        port.postMessage({
-          action: 'dialogResponse',
+        api.privateApi.dialogResponse({
           dialogId: id,
-          result: url,
+          result: key,
         });
       };
     });
