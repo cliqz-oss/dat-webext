@@ -4,7 +4,8 @@
   "description": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "browserify -r fs:graceful-fs -e index.js > addon/background.js",
+    "build": "npm run build:background && npm run build:webapi",
+    "build:background": "browserify -r fs:graceful-fs -e background/index.js > addon/background.js",
     "build:webapi": "browserify -e ./web-api/web-api.js > addon/web-api.js",
     "start": "env MOZ_DISABLE_CONTENT_SANDBOX=1 web-ext run -s addon --firefox=nightly --no-reload",
     "postinstall": "./copy-assets.sh"
