@@ -1,4 +1,4 @@
-const randomAccessIdb = require('random-access-idb');
+const RandomAccess = require('@sammacbeth/random-access-idb-mutable-file');
 const parseUrl = require('parse-dat-url');
 const DatArchive = require('./dat').DatArchive;
 
@@ -13,7 +13,10 @@ module.exports = class DatLibrary {
   }
 
   async getStorage(key) {
-    return randomAccessIdb(key, { idb: global.indexedDB })
+    return await RandomAccess.mount({
+      name: key,
+      storeName: 'data',
+    });
   }
 
   async init() {
