@@ -1,8 +1,10 @@
 const Spanan = require('spanan').default;
 const DatArchive = require('./dat').DatArchive;
+const dialog = require('./dialog');
 
 class DatApi {
-  constructor(getArchiveFromUrl) {
+  constructor(library) {
+    const getArchiveFromUrl = library.getArchiveFromUrl.bind(library);
     this.listenerStreams = new Map();
     const listenerStreams = this.listenerStreams
     let streamCtr = 0;
@@ -11,10 +13,7 @@ class DatApi {
     });
     const events = apiWrapper.createProxy();
 
-    this.api = {
-      resolveName(name) {
-        return DatArchive.resolveName(name);
-      },
+    this.privateApi = {
       async create(opts) {
         const archive = await DatArchive.create(opts);
         return archive.url;
@@ -22,6 +21,50 @@ class DatApi {
       async fork(url, opts) {
         const archive = await DatArchive.fork(url, opts);
         return archive.url;
+      },
+      async dialogResponse(message) {
+        dialog.onMessage(message);
+      },
+      async getArchive(url) {
+        return await getArchiveFromUrl(url);
+      },
+      async listLibrary(filters) {
+        return library.getLibraryArchives();
+      },
+    }
+
+    this.api = {
+      resolveName(name) {
+        return DatArchive.resolveName(name);
+      },
+      async create(opts = {}) {
+        return await dialog.open({
+          action: 'create',
+          opts: {
+            title: opts.title,
+            description: opts.description,
+          }
+        });
+      },
+      async fork(url, opts = {}) {
+        return await dialog.open({
+          action: 'fork',
+          opts: {
+            url,
+            title: opts.title,
+            description: opts.description,
+          }
+        });
+      },
+      async selectArchive(opts = {}) {
+        return await dialog.open({
+          action: 'selectArchive',
+          opts: {
+            title: opts.title,
+            buttonLabel: opts.buttonLabel,
+            filters: opts.filters,
+          }
+        });
       },
       async load(url) {
         const archive = await getArchiveFromUrl(url);
@@ -49,7 +92,16 @@ class DatApi {
       },
       async readdir(url, path, opts) {
         const archive = await getArchiveFromUrl(url);
-        return archive.readdir(path, opts);
+        const listing = await archive.readdir(path, opts);
+        if (opts && opts.stat) {
+          // serialise stat
+          return listing.map(({ name, stat }) => {
+            stat._isDirectory = stat.isDirectory();
+            stat._isFile = stat.isFile();
+            return { name, stat };
+          });
+        }
+        return listing;
       },
       async history(url, opts) {
         const archive = await getArchiveFromUrl(url);
