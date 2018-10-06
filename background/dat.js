@@ -1,21 +1,14 @@
 const DatArchiveWeb = require('@sammacbeth/dat-archive-web');
-const DatGatewayIntroducer = require('@sammacbeth/discovery-swarm/web/dat-gateway');
 const TCPTransport = require('@sammacbeth/discovery-swarm/webext/tcp-transport');
 const LanDiscovery = require('@sammacbeth/discovery-swarm/webext/service-discovery');
 const PeerDiscovery = require('@sammacbeth/discovery-swarm/web/peer-discovery');
 const resolveName = require('./dns');
 const Swarm = require('./network');
 
-const gateways = [
-  'ws://macbeth.cc:3000',
-  'ws://gateway.mauve.moe:3000',
-];
-
 const swarmConfig = {
   debug: true,
   sparse: true,
   introducers: [
-    new DatGatewayIntroducer(gateways),
     new LanDiscovery({ announce: true }),
     new PeerDiscovery('https://discovery-server-ljfbfatalr.now.sh'),
   ],
@@ -34,7 +27,7 @@ const DefaultManager = DatArchiveWeb.DefaultManager;
 
 class Manager extends DefaultManager {
   constructor(library) {
-    super(gateways[0].replace('wss:', 'https:').replace('ws:', 'http:'));
+    super();
     this.port = 443;
     this.library = library;
   }
