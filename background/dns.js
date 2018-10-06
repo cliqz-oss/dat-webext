@@ -11,6 +11,9 @@ module.exports = async function resolve(url) {
   if (datUrlMatcher.test(host)) {
     return host;
   }
+  if (!host) {
+    throw new DNSLookupFailed('Could not parse URL');
+  }
   // check for cached lookup
   const cached = lookupCache.get(host);
   if (cached) {

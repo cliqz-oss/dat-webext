@@ -1,0 +1,65 @@
+{
+    "manifest_version": 2,
+    "name": "Dat Protocol Test",
+    "version": "0.0.1",
+    "background": {
+        "scripts": ["test-bundle.js"]
+    },
+    "permissions": [
+        "storage",
+        "unlimitedStorage"
+    ],
+    "experiment_apis": {
+        "test": {
+            "schema": "../addon/libdweb/test/test.json",
+            "child": {
+              "scopes": ["addon_child"],
+              "paths": [["test"]],
+              "script": "../addon/libdweb/test/test.js"
+            }
+        },
+        "protocol": {
+            "schema": "../addon/libdweb/protocol/protocol.json",
+            "child": {
+                "scopes": ["addon_child"],
+                "paths": [["protocol"]],
+                "script": "../addon/libdweb/protocol/client.js"
+            },
+            "parent": {
+                "events": ["startup"],
+                "scopes": ["addon_parent"],
+                "paths": [["protocol"]],
+                "script": "../addon/libdweb/protocol/host.js"
+            }
+        },
+        "processScript": {
+            "schema": "../addon/processScript/schema.json",
+            "parent": {
+                "scopes": ["addon_parent"],
+                "paths": [["processScript"]],
+                "script": "../addon/processScript/host.js"
+            }
+        },
+        "TCPSocket": {
+            "schema": "../addon/libdweb/TCPSocket/TCPSocket.json",
+            "child": {
+                "scopes": ["addon_child"],
+                "paths": [["TCPSocket"]],
+                "script": "../addon/libdweb/TCPSocket/Socket.js"
+            }
+        },
+        "ServiceDiscovery": {
+            "schema": "../addon/libdweb/ServiceDiscovery/ServiceDiscovery.json",
+            "child": {
+                "scopes": ["addon_child"],
+                "paths": [["ServiceDiscovery"]],
+                "script": "../addon/libdweb/ServiceDiscovery/client.js"
+            },
+            "parent": {
+                "scopes": ["addon_parent"],
+                "paths": [["ServiceDiscovery"]],
+                "script": "../addon/libdweb/ServiceDiscovery/host.js"
+            }
+        }
+    }
+}
