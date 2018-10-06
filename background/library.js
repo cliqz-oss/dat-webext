@@ -29,7 +29,7 @@ module.exports = class DatLibrary {
   }
 
   getArchiveState(key) {
-    const state = this.archives[key];
+    const state = this.archives[key] || {};
     state.open = this.openArchives.has(key)
     if (state.open) {
       const archive = this.openArchives.get(key);
@@ -53,6 +53,10 @@ module.exports = class DatLibrary {
 
   getLibraryArchives() {
     return this.getArchives().filter(({ inLibrary }) => inLibrary);
+  }
+
+  getArchivesStates() {
+    return Object.keys(this.archives).map(key => this.getArchiveState(key));
   }
 
   closeArchive(key) {
@@ -110,9 +114,8 @@ module.exports = class DatLibrary {
     if (!this.openArchives.has(key)) {
       archive = new DatArchive(`dat://${addr}`)
       this.openArchives.set(key, archive);
-      archive._loadPromise.then(() => {
-        this._addLibraryEntry(archive);
-      });
+      await archive._loadPromise;
+      this._addLibraryEntry(archive);
     }
     archive = this.openArchives.get(key);
     this._touchLibraryEntry(archive);
@@ -123,4 +126,6 @@ module.exports = class DatLibrary {
     const { host } = parseUrl(url);
     return this.getArchive(host);
   }
+
+
 }

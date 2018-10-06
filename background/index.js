@@ -29,7 +29,7 @@ library.getArchives().filter(a => a.isOwner).forEach((a) => library.getArchive(a
 
 // manage open archives
 setInterval(() => {
-  const archives = library.getArchives().map((key) => library.getArchiveState(key));
+  const archives = library.getArchivesStates();
   // get archives which have active listeners
   const activeStreams = new Set();
   api.listenerStreams.forEach(({ key }) => activeStreams.add(key));
