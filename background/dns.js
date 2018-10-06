@@ -1,9 +1,10 @@
 const parseUrl = require('parse-dat-url');
+const { DNSLookupFailed } = require('./errors');
 
 const datUrlMatcher = /^[0-9a-f]{64}$/;
 const lookupCache = new Map();
 
-const proxyUrl = 'http://macbeth.cc:3000';
+const proxyUrl = 'http://gateway.mauve.moe:3000';
 
 module.exports = async function resolve(url) {
   const { host } = parseUrl(url);
@@ -32,9 +33,11 @@ module.exports = async function resolve(url) {
       ttl = ttl.startsWith('TTL=') || ttl.startsWith('ttl=') ? parseInt(ttl.substring(4)) : 3600;
       lookupCache.set(host, { address: addr, expires: Date.now() + (ttl * 1000) });
       return addr;
+    } else {
+      throw new DNSLookupFailed(host);
     }
   } catch (e) {
-    console.error('lookup error', e);
+    throw new DNSLookupFailed(host);
   }
   return null;
 }

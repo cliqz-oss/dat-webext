@@ -2,6 +2,7 @@ const parseUrl = require('parse-dat-url');
 const pda = require('pauls-dat-api');
 const joinPaths = require('path').join;
 const mime = require('mime');
+const { DNSLookupFailed } = require('./errors');
 
 class StreamIterator {
   constructor(stream) {
@@ -68,8 +69,8 @@ module.exports = {
     return {
       contentType: mime.getType(filePath) || undefined,
       content: (async function* () {
-        const archive = await getArchive(host);
         try {
+          const archive = await getArchive(host);
           let isFolder = filePath.endsWith('/');
           const manifest = await pda.readManifest(archive._archive).catch(_ => { });
 
@@ -143,6 +144,10 @@ module.exports = {
             yield next.buffer;
           }
         } catch (e) {
+          if (e instanceof DNSLookupFailed) {
+            yield responseText(`DNS Lookup failed for ${e.message}`);
+            return;
+          }
           console.error(`handler error: ${request}`, e);
           yield responseText(`Error: ${e}`);
         }
