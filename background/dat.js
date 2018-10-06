@@ -10,7 +10,7 @@ const swarmConfig = {
   sparse: true,
   introducers: [
     new LanDiscovery({ announce: true }),
-    new PeerDiscovery('https://discovery-server-ljfbfatalr.now.sh'),
+    new PeerDiscovery('https://discovery-server-xtvckisgjh.now.sh'),
   ],
   transport: {
     tcp: new TCPTransport(),
