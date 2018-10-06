@@ -60,7 +60,7 @@ async function setupForm() {
     document.getElementById('fork-url').innerText = opts.url;
     const source = await api.privateApi.getArchive(opts.url);
     const info = await source.getInfo({ timeout: 30000 });
-    const download = source.download('/');
+    const download = source.download('/').catch(() => {});
     if (info.title) {
       document.getElementById('fork-message').innerText = `Fork '${info.title}'`;
     }
