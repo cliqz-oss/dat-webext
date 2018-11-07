@@ -4,7 +4,7 @@
   "description": "",
   "scripts": {
     "build:test": "browserify -r fs:graceful-fs -e test/test.js > test/test-bundle.js",
-    "test": "tape-ext ./test/manifest.json",
+    "test": "MOZ_BINARY=/opt/firefox_62/firefox tape-ext ./test/manifest.json",
     "build": "npm run build:background && npm run build:webapi",
     "build:background": "browserify -r fs:graceful-fs -e background/index.js > addon/background.js",
     "build:webapi": "browserify -e ./web-api/web-api.js > addon/web-api.js",
@@ -15,9 +15,11 @@
   "license": "MIT",
   "dependencies": {
     "@sammacbeth/dat-archive-web": "1.1.2",
-    "@sammacbeth/discovery-swarm": "0.0.4",
+    "@sammacbeth/discovery-swarm": "1.0.8",
+    "@sammacbeth/discovery-swarm-web": "^1.0.8",
+    "@sammacbeth/discovery-swarm-webext": "^1.0.8",
     "@sammacbeth/libdweb": "0.0.2",
-    "@sammacbeth/random-access-idb-mutable-file": "^0.1.0",
+    "@sammacbeth/random-access-idb-mutable-file": "^0.1.1",
     "base64-js": "^1.3.0",
     "bootstrap": "^4.1.3",
     "browserify": "^16.2.2",

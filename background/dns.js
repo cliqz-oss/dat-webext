@@ -4,7 +4,7 @@ const { DNSLookupFailed } = require('./errors');
 const datUrlMatcher = /^[0-9a-f]{64}$/;
 const lookupCache = new Map();
 
-const proxyUrl = 'http://gateway.mauve.moe:3000';
+const proxyUrl = 'https://dns.dat-web.eu';
 
 module.exports = async function resolve(url) {
   const { host } = parseUrl(url);

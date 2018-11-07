@@ -62,15 +62,39 @@ function responseText(string) {
   return encoder.encode(string).buffer;
 }
 
+function timeout(ms) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      reject(new Error('timeout'));
+    }, ms);
+  })
+}
+
 module.exports = {
   handleRequest(request, { getArchive }) {
     const { host, pathname, version, search } = parseUrl(request.url);
     let filePath = decodeURIComponent(pathname);
     return {
-      contentType: mime.getType(filePath) || undefined,
+      contentType: mime.getType(filePath) || null,
       content: (async function* () {
+        let archive;
         try {
-          const archive = await getArchive(host);
+          const loadArchive = getArchive(host);
+          await Promise.race([loadArchive, timeout(30000)]);
+          archive = await loadArchive;
+        } catch (e) {
+          if (e instanceof DNSLookupFailed) {
+            yield responseText(`DNS Lookup failed for ${e.message}`);
+            return;
+          } else if (e.message === 'timeout') {
+            yield responseText('Unable locate the Dat archive on the network.');
+            return;
+          } else {
+            yield responseText(`Error: ${e}`);
+            return;
+          }
+        }
+        try {
           let isFolder = filePath.endsWith('/');
           const manifest = await pda.readManifest(archive._archive).catch(_ => { });
 
@@ -144,10 +168,6 @@ module.exports = {
             yield next.buffer;
           }
         } catch (e) {
-          if (e instanceof DNSLookupFailed) {
-            yield responseText(`DNS Lookup failed for ${e.message}`);
-            return;
-          }
           console.error(`handler error: ${request}`, e);
           yield responseText(`Error: ${e}`);
         }

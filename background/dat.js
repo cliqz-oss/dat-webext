@@ -1,16 +1,17 @@
 const DatArchiveWeb = require('@sammacbeth/dat-archive-web');
-const TCPTransport = require('@sammacbeth/discovery-swarm/webext/tcp-transport');
-const LanDiscovery = require('@sammacbeth/discovery-swarm/webext/service-discovery');
-const PeerDiscovery = require('@sammacbeth/discovery-swarm/web/peer-discovery');
+const TCPTransport = require('@sammacbeth/discovery-swarm-webext/tcp-transport')
+const LanDiscovery = require('@sammacbeth/discovery-swarm-webext/service-discovery');
+const { DatGateway, PeerDiscovery, WebRTCTransport } = require('@sammacbeth/discovery-swarm-web');
+const Swarm = require('@sammacbeth/discovery-swarm').MultiSwarm;
 const resolveName = require('./dns');
-const Swarm = require('./network');
 
 const swarmConfig = {
   debug: true,
   sparse: true,
   introducers: [
+    new DatGateway('wss://dat-gateway-erifykhbhh.now.sh'),
     new LanDiscovery({ announce: true }),
-    new PeerDiscovery('https://discovery-server-xtvckisgjh.now.sh'),
+    new PeerDiscovery('https://discovery.dat-web.eu'),
   ],
   transport: {
     tcp: new TCPTransport(),
