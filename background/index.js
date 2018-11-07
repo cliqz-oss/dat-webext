@@ -1,4 +1,4 @@
-const protocolHandler = require('./protocol');
+const DatHandler = require('./protocol');
 const DatLibrary = require('./library');
 const dat = require('./dat');
 const DatApi = require('./api');
@@ -17,8 +17,9 @@ global.library = library;
 
 const getArchive = library.getArchive.bind(library);
 
+const protocolHandler = new DatHandler(getArchive);
 browser.protocol.registerProtocol('dat', (request) => {
-  return protocolHandler.handleRequest(request, { getArchive });
+  return protocolHandler.handleRequest(request);
 });
 
 const api = new DatApi(library);

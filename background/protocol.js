@@ -62,116 +62,134 @@ function responseText(string) {
   return encoder.encode(string).buffer;
 }
 
-function timeout(ms) {
+function timeoutWithError(ms, errorCtr) {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
-      reject(new Error('timeout'));
+      reject(errorCtr());
     }, ms);
   })
 }
 
-module.exports = {
-  handleRequest(request, { getArchive }) {
-    const { host, pathname, version, search } = parseUrl(request.url);
-    let filePath = decodeURIComponent(pathname);
+async function* fileStream(archive, path) {
+  const stream = archive._archive.createReadStream(path, { start: 0 });
+  const streamIt = new StreamIterator(stream);
+  while (true) {
+    const next = await streamIt.next();
+    if (!next) {
+      break;
+    }
+    yield next.buffer;
+  }
+}
+
+const ERROR = {
+  ARCHIVE_LOAD_TIMEOUT: 'ARCHIVE_LOAD_TIMEOUT',
+  NOT_FOUND: 'NOT_FOUND',
+  DIRECTORY: 'DIRECTORY',
+}
+
+class DatHandler {
+  constructor(getArchive) {
+    this.getArchive = getArchive;
+  }
+
+  async loadArchive(host, timeout = 30000) {
+    const loadArchive = this.getArchive(host);
+    await Promise.race([
+      loadArchive, 
+      timeoutWithError(timeout, () => new Error(ERROR.ARCHIVE_LOAD_TIMEOUT))
+    ]);
+    return loadArchive;
+  }
+
+  async resolvePath(host, pathname, version) {
+    const archive = await this.loadArchive(host);
+    const manifest = await pda.readManifest(archive._archive).catch(_ => ({ }));
+    const root = manifest.web_root || '';
+    const path = decodeURIComponent(pathname);
+    let lastPath;
+
+    async function tryStat(testPath) {
+      try {
+        lastPath = testPath;
+        return await archive.stat(testPath);
+      } catch (e) {
+        return false;
+      }
+    }
+
+    let f = await tryStat(joinPaths(root, path));
+    if (f && f.isFile()) {
+      return {
+        archive,
+        path: lastPath,
+      }
+    }
+    // for directories try to find an index file
+    if (f && f.isDirectory()) {
+      if (await tryStat(joinPaths(root, path, 'index.html'))) {
+        return {
+          archive,
+          path: lastPath,
+        }
+      }
+      if (await tryStat(joinPaths(root, path, 'index.htm'))) {
+        return {
+          archive,
+          path: lastPath,
+        }
+      }
+      // error list directory
+      throw new Error(ERROR.DIRECTORY);
+    }
+    if (await tryStat(joinPaths(root, `${path}.html`))) {
+      return {
+        archive,
+        path: lastPath,
+      }
+    }
+
+    if (manifest.fallback_page) {
+      if (await tryStat(joinPaths(root, manifest.fallback_page))) {
+        return {
+          archive,
+          path: lastPath,
+        }
+      }
+    }
+    console.log('not found', root, path, await archive.readdir('/', { recursive: true }))
+    throw new Error(ERROR.NOT_FOUND);
+  }
+
+  handleRequest(request) {
+    const self = this;
+    const { host, pathname, version } = parseUrl(request.url);
     return {
-      contentType: mime.getType(filePath) || null,
+      contentType: mime.getType(decodeURIComponent(pathname)) || null,
       content: (async function* () {
-        let archive;
         try {
-          const loadArchive = getArchive(host);
-          await Promise.race([loadArchive, timeout(30000)]);
-          archive = await loadArchive;
+          const { archive, path } = await self.resolvePath(host, pathname, version);
+          const data = fileStream(archive, path);
+          for await (const chunk of data) {
+            yield chunk;
+          }
         } catch (e) {
           if (e instanceof DNSLookupFailed) {
             yield responseText(`DNS Lookup failed for ${e.message}`);
             return;
-          } else if (e.message === 'timeout') {
+          } else if (e.message === ERROR.ARCHIVE_LOAD_TIMEOUT) {
             yield responseText('Unable locate the Dat archive on the network.');
             return;
+          } else if (e.message === ERROR.NOT_FOUND) {
+            yield responseText('Not found:', e);
           } else {
-            yield responseText(`Error: ${e}`);
-            return;
+            console.error(e);
+            yield responseText('Unexpected error:', e);
           }
         }
-        try {
-          let isFolder = filePath.endsWith('/');
-          const manifest = await pda.readManifest(archive._archive).catch(_ => { });
-
-          let entry = null;
-          const tryStat = async (testPath) => {
-            // abort if we've already found it
-            if (entry) return
-            // apply the web_root config
-            if (manifest && manifest.web_root) {
-              if (testPath) {
-                testPath = joinPaths(manifest.web_root, testPath)
-              } else {
-                testPath = manifest.web_root
-              }
-            }
-            // attempt lookup
-            try {
-              entry = await archive.stat(testPath)
-              entry.path = testPath;
-            } catch (e) {
-              console.error('stat error', testPath, e);
-            }
-          }
-
-          if (!isFolder) {
-            await tryStat(filePath)
-            if (entry && entry.isDirectory()) {
-              entry = null;
-              await tryStat(`${filePath}/${search}`);
-              if (entry && entry.isDirectory()) {
-                isFolder = true;
-                filePath = `${filePath}/${search}`;
-                entry = null;
-              }
-            }
-          }
-
-          if (isFolder) {
-            await tryStat(filePath + 'index.html')
-            await tryStat(filePath + 'index.md')
-            await tryStat(filePath)
-          } else {
-            await tryStat(filePath)
-            await tryStat(filePath + '.html') // fallback to .html
-          }
-
-          if (entry && entry.isDirectory()) {
-            yield responseText(`Directory ${entry.path}`);
-            return;
-          }
-
-          if (!entry) {
-            // check for a fallback page
-            if (manifest && manifest.fallback_page) {
-              await tryStat(manifest.fallback_page)
-            }
-
-            if (!entry) {
-              yield responseText(`Error: Not found`);
-              return;
-            }
-          }
-
-          const stream = archive._archive.createReadStream(entry.path, { start: 0 });
-          const streamIt = new StreamIterator(stream);
-          while (true) {
-            const next = await streamIt.next();
-            if (!next) {
-              break;
-            }
-            yield next.buffer;
-          }
-        } catch (e) {
-          console.error(`handler error: ${request}`, e);
-          yield responseText(`Error: ${e}`);
-        }
-      })()
-    };
-  },
+      })(),
+    }
+  }
 }
+
+module.exports = DatHandler;
