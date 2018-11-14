@@ -9,7 +9,7 @@ const swarmConfig = {
   debug: true,
   sparse: true,
   introducers: [
-    new DatGateway('wss://dat-gateway-erifykhbhh.now.sh'),
+    new DatGateway('wss://gateway.dat-web.eu'),
     new LanDiscovery({ announce: true }),
     new PeerDiscovery('https://discovery.dat-web.eu'),
   ],

@@ -96,13 +96,14 @@ class DatHandler {
   async loadArchive(host, timeout = 30000) {
     const loadArchive = this.getArchive(host);
     await Promise.race([
-      loadArchive, 
+      loadArchive,
       timeoutWithError(timeout, () => new Error(ERROR.ARCHIVE_LOAD_TIMEOUT))
     ]);
     return loadArchive;
   }
 
   async resolvePath(host, pathname, version) {
+    const timeoutAt = Date.now() + 30000;
     const archive = await this.loadArchive(host);
     const manifest = await pda.readManifest(archive._archive).catch(_ => ({ }));
     const root = manifest.web_root || '';
@@ -112,7 +113,7 @@ class DatHandler {
     async function tryStat(testPath) {
       try {
         lastPath = testPath;
-        return await archive.stat(testPath);
+        return await archive.stat(testPath, { timeout: timeoutAt - Date.now() });
       } catch (e) {
         return false;
       }
@@ -165,7 +166,7 @@ class DatHandler {
     const self = this;
     const { host, pathname, version } = parseUrl(request.url);
     return {
-      contentType: mime.getType(decodeURIComponent(pathname)) || null,
+      contentType: mime.getType(decodeURIComponent(pathname)) || 'text/html',
       content: (async function* () {
         try {
           const { archive, path } = await self.resolvePath(host, pathname, version);

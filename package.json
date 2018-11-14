@@ -15,9 +15,9 @@
   "license": "MIT",
   "dependencies": {
     "@sammacbeth/dat-archive-web": "1.1.2",
-    "@sammacbeth/discovery-swarm": "1.0.8",
-    "@sammacbeth/discovery-swarm-web": "^1.0.8",
-    "@sammacbeth/discovery-swarm-webext": "^1.0.8",
+    "@sammacbeth/discovery-swarm": "1.0.9",
+    "@sammacbeth/discovery-swarm-web": "^1.0.9",
+    "@sammacbeth/discovery-swarm-webext": "^1.0.9",
     "@sammacbeth/libdweb": "0.0.2",
     "@sammacbeth/random-access-idb-mutable-file": "^0.1.1",
     "base64-js": "^1.3.0",
