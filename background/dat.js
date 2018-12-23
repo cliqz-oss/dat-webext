@@ -1,24 +1,72 @@
 const DatArchiveWeb = require('@sammacbeth/dat-archive-web');
-const TCPTransport = require('@sammacbeth/discovery-swarm-webext/tcp-transport')
-const LanDiscovery = require('@sammacbeth/discovery-swarm-webext/service-discovery');
-const { DatGateway, PeerDiscovery, WebRTCTransport } = require('@sammacbeth/discovery-swarm-web');
-const Swarm = require('@sammacbeth/discovery-swarm').MultiSwarm;
+const disc = require('discovery-swarm');
+const hypercoreProtocol = require('hypercore-protocol');
+const swarmDefaults = require('dat-swarm-defaults');
 const resolveName = require('./dns');
 
-const swarmConfig = {
-  debug: true,
-  sparse: true,
-  introducers: [
-    new DatGateway('wss://gateway.dat-web.eu'),
-    new LanDiscovery({ announce: true }),
-    new PeerDiscovery('https://discovery.dat-web.eu'),
-  ],
-  transport: {
-    tcp: new TCPTransport(),
-  },
+class MultiSwarm {
+  constructor(opts) {
+    this.swarm = disc(swarmDefaults({
+      hash: false,
+      stream: this.replicate.bind(this),
+    }));
+    this.swarm.on('peer', (peer) => console.log('peer', peer));
+    this.archives = new Map();
+  }
+
+  listen(port) {
+    return this.swarm.listen(port);
+  }
+
+  add(archive) {
+    archive.ready(() => {
+      const key = archive.discoveryKey.toString('hex');
+      this.archives.set(key, archive);
+      this.swarm.join(archive.discoveryKey, {
+        key: archive.key,
+      });
+    });
+  }
+
+  remove(archive) {
+    const key = archive.discoveryKey.toString('hex');
+    this.archives.delete(key);
+    this.swarm.leave(archive.discoveryKey);
+  }
+
+  replicate(opts) {
+    const stream = hypercoreProtocol({
+      live: true,
+      id: this.swarm.id,
+      encrypt: true
+    });
+
+    const add = (dk) => {
+      const key = dk.toString('hex');
+      if (!this.archives.has(key)) {
+        return;
+      }
+      const archive = this.archives.get(key);
+      archive.replicate({
+        live: true,
+        stream,
+      });
+    };
+
+    stream.on('feed', add);
+    if (opts.channel) {
+      add(opts.channel);
+    }
+
+    return stream;
+  }
+
+  destroy() {
+    this.swarm.destroy();
+  }
 }
 
-const swarm = new Swarm(swarmConfig);
+const swarm = new MultiSwarm();
 swarm.listen();
 window.addEventListener('unload', () => {
   swarm.destroy();

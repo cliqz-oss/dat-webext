@@ -57,6 +57,22 @@
                 "paths": [["ServiceDiscovery"]],
                 "script": "libdweb/ServiceDiscovery/host.js"
             }
+        },
+        "UDPSocket": {
+            "schema": "libdweb/UDPSocket/UDPSocket.json",
+            "child": {
+              "scopes": ["addon_child"],
+              "paths": [["UDPSocket"]],
+              "script": "libdweb/UDPSocket/Socket.js"
+            }
+        },
+        "DNS": {
+            "schema": "libdweb/dns/dns.json",
+            "parent": {
+              "scopes": ["addon_parent"],
+              "paths": [["DNS"]],
+              "script": "libdweb/dns/dns.js"
+            }
         }
     }
 }
