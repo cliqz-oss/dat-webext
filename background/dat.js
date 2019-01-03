@@ -5,12 +5,11 @@ const swarmDefaults = require('dat-swarm-defaults');
 const resolveName = require('./dns');
 
 class MultiSwarm {
-  constructor(opts) {
+  constructor() {
     this.swarm = disc(swarmDefaults({
       hash: false,
       stream: this.replicate.bind(this),
     }));
-    this.swarm.on('peer', (peer) => console.log('peer', peer));
     this.archives = new Map();
   }
 
