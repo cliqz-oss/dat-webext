@@ -1,12 +1,12 @@
-const parseUrl = require('parse-dat-url');
-const { DNSLookupFailed } = require('./errors');
+import * as parseUrl from 'parse-dat-url';
+import { DNSLookupFailed } from './errors';
 
 const datUrlMatcher = /^[0-9a-f]{64}$/;
 const lookupCache = new Map();
 
 const proxyUrl = 'https://dat-dns.now.sh';
 
-module.exports = async function resolve(url) {
+export default async function resolve(url) {
   const { host } = parseUrl(url);
   if (datUrlMatcher.test(host)) {
     return host;
@@ -33,8 +33,8 @@ module.exports = async function resolve(url) {
     let [addr, ttl] = lookup.split('\n');
     if (addr.startsWith('dat://')) {
       addr = addr.substring(6);
-      ttl = ttl.startsWith('TTL=') || ttl.startsWith('ttl=') ? parseInt(ttl.substring(4)) : 3600;
-      lookupCache.set(host, { address: addr, expires: Date.now() + (ttl * 1000) });
+      const iTtl = ttl.startsWith('TTL=') || ttl.startsWith('ttl=') ? parseInt(ttl.substring(4)) : 3600;
+      lookupCache.set(host, { address: addr, expires: Date.now() + (iTtl * 1000) });
       return addr;
     } else {
       throw new DNSLookupFailed(host);
