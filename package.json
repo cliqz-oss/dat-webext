@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "",
   "scripts": {
-    "build:test": "webextify -r fs:graceful-fs -e test/test.js > test/test-bundle.js",
+    "build:test": "webextify -r fs:graceful-fs -e test/test.ts -p tsify > test/test-bundle.js",
     "test": "tape-ext ./test/manifest.json",
     "build": "npm run build:background && npm run build:webapi",
     "build:background": "webextify -r fs:graceful-fs -e background/index.ts -p tsify > addon/background.js",

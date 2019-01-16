@@ -1,16 +1,16 @@
-const DatLibrary = require('../background/library');
-const dat = require('../background/dat');
+import DatLibrary from '../background/library';
 
 const { test } = browser.test;
 
 // we have to register the protocol so the URL implementation
 // recognises dat:// as a protocol.
-browser.protocol.registerProtocol('dat', (request) => {});
+browser.protocol.registerProtocol('dat', (request) => ({
+  content: () => {}
+}));
 
 async function setupLibrary() {
   const library = new DatLibrary();
   await library.init();
-  dat.initManager(library);
   return library;
 }
 

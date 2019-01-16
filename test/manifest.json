@@ -48,17 +48,12 @@
                 "script": "../addon/libdweb/TCPSocket/Socket.js"
             }
         },
-        "ServiceDiscovery": {
-            "schema": "../addon/libdweb/ServiceDiscovery/ServiceDiscovery.json",
-            "child": {
-                "scopes": ["addon_child"],
-                "paths": [["ServiceDiscovery"]],
-                "script": "../addon/libdweb/ServiceDiscovery/client.js"
-            },
+        "DNS": {
+            "schema": "../addon/libdweb/dns/dns.json",
             "parent": {
-                "scopes": ["addon_parent"],
-                "paths": [["ServiceDiscovery"]],
-                "script": "../addon/libdweb/ServiceDiscovery/host.js"
+              "scopes": ["addon_parent"],
+              "paths": [["DNS"]],
+              "script": "../addon/libdweb/dns/dns.js"
             }
         }
     }

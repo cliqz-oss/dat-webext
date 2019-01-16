@@ -4,6 +4,13 @@ declare namespace browser.processScript {
   function sendMessage(message: object): void
 }
 
+declare namespace browser.test {
+  interface Assert {
+    ok(v: boolean): void
+  }
+  function test(name: string, test: (assert: Assert) => Promise<void>): void
+}
+
 declare namespace browser.protocol {
   type Request = {
     url: string
