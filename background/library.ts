@@ -1,10 +1,28 @@
-const RandomAccess = require('@sammacbeth/random-access-idb-mutable-file');
-const parseUrl = require('parse-dat-url');
-const DatArchive = require('./dat').DatArchive;
+import * as RandomAccess from '@sammacbeth/random-access-idb-mutable-file';
+import * as parseUrl from 'parse-dat-url';
+import { DatArchive } from './dat';
 
 const ARCHIVE_LIST_KEY = 'archives';
 
-module.exports = class DatLibrary {
+export interface ArchiveMetadata extends browser.storage.StorageObject {
+  isOwner: boolean
+  key: string
+  open: boolean
+  created: number
+  lastUsed: number,
+  content?: {}
+  metadata?: {}
+}
+
+export interface Archives extends browser.storage.StorageObject {
+  [key: string]: ArchiveMetadata
+}
+
+export default class DatLibrary {
+
+  openArchives: Map<string, any>
+  storageLock: Promise<void>
+  archives: Archives
 
   constructor() {
     this.openArchives = new Map();
@@ -12,7 +30,7 @@ module.exports = class DatLibrary {
     this.archives = {};
   }
 
-  async getStorage(key) {
+  async getStorage(key: string, secretKey: string) {
     return await RandomAccess.mount({
       name: key,
       storeName: 'data',
@@ -20,7 +38,7 @@ module.exports = class DatLibrary {
   }
 
   async init() {
-    this.archives = (await browser.storage.local.get(ARCHIVE_LIST_KEY))[ARCHIVE_LIST_KEY] || {};
+    this.archives = ((await browser.storage.local.get(ARCHIVE_LIST_KEY))[ARCHIVE_LIST_KEY] || {}) as Archives;
   }
 
   async _persistArchives() {
@@ -29,8 +47,8 @@ module.exports = class DatLibrary {
   }
 
   getArchiveState(key) {
-    const state = this.archives[key] || {};
-    state.open = this.openArchives.has(key)
+    const open = this.openArchives.has(key)
+    const state: ArchiveMetadata = this.archives[key] || { open, isOwner: false, key, created: Date.now(), lastUsed: 0 };
     if (state.open) {
       const archive = this.openArchives.get(key);
       state.content = {
@@ -71,7 +89,7 @@ module.exports = class DatLibrary {
     if (this.openArchives.has(key)) {
       throw 'Cannot delete an open archive';
     }
-    global.indexedDB.deleteDatabase(key);
+    window.indexedDB.deleteDatabase(key);
     delete this.archives[key];
     return this._persistArchives();
   }
@@ -81,6 +99,7 @@ module.exports = class DatLibrary {
     if (!this.archives[key]) {
       this.archives[key] = {
         key,
+        open: true,
         created: Date.now(),
         lastUsed: Date.now(),
         isOwner: archive._archive.writable,

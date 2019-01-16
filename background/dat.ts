@@ -1,10 +1,15 @@
-const DatArchiveWeb = require('@sammacbeth/dat-archive-web');
-const disc = require('discovery-swarm');
-const hypercoreProtocol = require('hypercore-protocol');
-const swarmDefaults = require('dat-swarm-defaults');
-const resolveName = require('./dns');
+import * as DatArchiveWeb from '@sammacbeth/dat-archive-web';
+import * as disc from 'discovery-swarm';
+import * as hypercoreProtocol from 'hypercore-protocol';
+import * as swarmDefaults from 'dat-swarm-defaults';
+import resolveName from './dns';
+import DatLibrary from './library';
 
 class MultiSwarm {
+
+  swarm: any
+  archives: Map<string, any>
+
   constructor() {
     this.swarm = disc(swarmDefaults({
       hash: false,
@@ -13,7 +18,7 @@ class MultiSwarm {
     this.archives = new Map();
   }
 
-  listen(port) {
+  listen(port?) {
     return this.swarm.listen(port);
   }
 
@@ -71,9 +76,13 @@ window.addEventListener('unload', () => {
   swarm.destroy();
 });
 
-const DefaultManager = DatArchiveWeb.DefaultManager;
+const DefaultManager = DatArchiveWeb.DatArchive.DefaultManager;
 
 class Manager extends DefaultManager {
+
+  port: number
+  library: DatLibrary
+
   constructor(library) {
     super();
     this.port = 443;
@@ -101,7 +110,8 @@ class Manager extends DefaultManager {
 
 }
 
-class DatArchive extends DatArchiveWeb {
+export class DatArchive extends DatArchiveWeb.DatArchive {
+
   _replicate () {
     swarm.add(this._archive);
   }
@@ -117,10 +127,7 @@ class DatArchive extends DatArchiveWeb {
   }
 }
 
-module.exports = {
-  DatArchive,
-  initManager: (library) => {
-    const manager = new Manager(library);
-    DatArchive.setManager(manager);
-  }
-};
+export function initManager(library) {
+  const manager = new Manager(library);
+  DatArchive.setManager(manager);
+}

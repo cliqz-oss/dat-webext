@@ -1,7 +1,7 @@
-const DatHandler = require('./protocol');
-const DatLibrary = require('./library');
-const dat = require('./dat');
-const DatApi = require('./api');
+import DatHandler from './protocol';
+import DatLibrary from './library';
+import { initManager } from './dat';
+import DatApi from './api';
 
 browser.processScript.setAPIScript(browser.runtime.getURL('web-api.js'));
 
@@ -12,8 +12,8 @@ const CLOSE_ARCHIVES_AFTER_MS = 1000 * 60 * 10;
 
 const library = new DatLibrary();
 library.init();
-dat.initManager(library);
-global.library = library;
+initManager(library);
+(<any>window).library = library;
 
 const getArchive = library.getArchive.bind(library);
 
@@ -23,7 +23,7 @@ browser.protocol.registerProtocol('dat', (request) => {
 });
 
 const api = new DatApi(library);
-global.api = api;
+(<any>window).api = api;
 
 // load my own archives
 library.getArchives().filter(a => a.isOwner).forEach((a) => library.getArchive(a.key));
@@ -43,8 +43,8 @@ setInterval(() => {
   const mb = 1024 * 1024;
   const usage = archives
     .filter(a => !a.isOwner)
-    .map(a => [a.key, (calculateUsage(a.metadata) + calculateUsage(a.content)) / mb]);
-  const totalUsage = usage.reduce((acc, a) => acc + (a[1] || 0), 0);
+    .map(a => ({ key: a.key, size: (calculateUsage(a.metadata) + calculateUsage(a.content)) / mb }));
+  const totalUsage = usage.reduce((acc, a) => acc + (a.size || 0), 0);
   console.log('data usage', usage, totalUsage);
   // prune data
   if (totalUsage > CACHE_SIZE_MB) {

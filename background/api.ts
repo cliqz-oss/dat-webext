@@ -1,9 +1,29 @@
-const Spanan = require('spanan').default;
-const DatArchive = require('./dat').DatArchive;
-const dialog = require('./dialog');
+import Spanan from 'spanan';
+import { DatArchive } from './dat';
+import dialog from './dialog';
+import { CreateOptions, SelectArchiveOptions } from './dat-archive';
+import DatLibrary, { ArchiveMetadata } from './library';
+
+interface CloseableEventTarget extends EventTarget {
+  close(): void
+}
 
 class DatApi {
-  constructor(library) {
+
+  listenerStreams: Map<number, {
+    stream: CloseableEventTarget
+    key: string
+  }>
+  privateApi: {
+    create(opts: CreateOptions): Promise<string>
+    fork(url: string, opts: CreateOptions): Promise<string>
+    dialogResponse(message: any): void
+    getArchive(url: string): Promise<DatArchive>
+    listLibrary(): Promise<ArchiveMetadata[]>
+  }
+  api: any
+
+  constructor(library: DatLibrary) {
     const getArchiveFromUrl = library.getArchiveFromUrl.bind(library);
     this.listenerStreams = new Map();
     const listenerStreams = this.listenerStreams
@@ -14,7 +34,7 @@ class DatApi {
     const events = apiWrapper.createProxy();
 
     this.privateApi = {
-      async create(opts) {
+      async create(opts: CreateOptions) {
         const archive = await DatArchive.create(opts);
         return archive.url;
       },
@@ -28,7 +48,7 @@ class DatApi {
       async getArchive(url) {
         return await getArchiveFromUrl(url);
       },
-      async listLibrary(filters) {
+      async listLibrary() {
         return library.getLibraryArchives();
       },
     }
@@ -37,7 +57,7 @@ class DatApi {
       resolveName(name) {
         return DatArchive.resolveName(name);
       },
-      async create(opts = {}) {
+      async create(opts: CreateOptions = {}) {
         return await dialog.open({
           action: 'create',
           opts: {
@@ -46,7 +66,7 @@ class DatApi {
           }
         });
       },
-      async fork(url, opts = {}) {
+      async fork(url: string, opts: CreateOptions = {}) {
         return await dialog.open({
           action: 'fork',
           opts: {
@@ -56,7 +76,7 @@ class DatApi {
           }
         });
       },
-      async selectArchive(opts = {}) {
+      async selectArchive(opts: SelectArchiveOptions = {}) {
         return await dialog.open({
           action: 'selectArchive',
           opts: {
@@ -152,7 +172,7 @@ class DatApi {
             data: evnt,
           });
           if (!response) {
-            stream.removeEventListener(response);
+            stream.removeEventListener(response, () => {});
           }
         }
         stream.addEventListener(eventType, listener);
@@ -180,10 +200,9 @@ class DatApi {
     })
 
     browser.runtime.onMessage.addListener((message) => {
-      console.log('recv', message);
       apiWrapper.handleMessage(message);
     });
   }
 };
 
-module.exports = DatApi;
+export default DatApi;

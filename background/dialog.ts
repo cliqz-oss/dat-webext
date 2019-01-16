@@ -2,7 +2,7 @@
 let dialogCtr = 1;
 const dialogs = new Map();
 
-module.exports = {
+export default {
   async open(message) {
     message.id = dialogCtr++;
     const win = await browser.windows.create({
