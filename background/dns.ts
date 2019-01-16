@@ -6,7 +6,7 @@ const lookupCache = new Map();
 
 const proxyUrl = 'https://dat-dns.now.sh';
 
-export default async function resolve(url) {
+export default async function resolve(url: string): Promise<string> {
   const { host } = parseUrl(url);
   if (datUrlMatcher.test(host)) {
     return host;

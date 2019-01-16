@@ -1,6 +1,7 @@
 import * as RandomAccess from '@sammacbeth/random-access-idb-mutable-file';
-import * as parseUrl from 'parse-dat-url';
-import { DatArchive } from './dat';
+import { createNode } from '@sammacbeth/dat-node';
+import { DatArchive, Hyperdrive, CreateOptions } from './dat';
+import resolve from './dns';
 
 const ARCHIVE_LIST_KEY = 'archives';
 
@@ -18,19 +19,58 @@ export interface Archives extends browser.storage.StorageObject {
   [key: string]: ArchiveMetadata
 }
 
-export default class DatLibrary {
+interface DatStorage {
+  getStorage(key: string): Promise<any>
+}
 
-  openArchives: Map<string, any>
+interface DatDNS {
+  resolve(name: string): Promise<string>
+}
+
+interface DatInfo {
+  key: string
+  dataStructureId: string
+  discoveryKey?: string
+  loadPromise: Promise<void>
+  dataStructure: Hyperdrive
+  isSwarming: boolean
+  replicationStreams?: any[]
+}
+
+interface DatNode {
+  storage: DatStorage
+  dns: DatDNS
+  _dats: {
+    [key: string]: DatInfo
+  }
+  listen(port?: number): void
+  close(): Promise<void>
+  getArchive(address: string): Promise<DatArchive>
+  createArchive(opts: CreateOptions): Promise<DatArchive>
+  forkArchive(url: string, opts: CreateOptions): Promise<DatArchive>
+  closeArchive(key: string): void
+}
+
+export default class DatLibrary implements DatStorage {
+
   storageLock: Promise<void>
   archives: Archives
+  node: DatNode
+  dns: DatDNS
 
   constructor() {
-    this.openArchives = new Map();
     this.storageLock = Promise.resolve();
     this.archives = {};
+    this.dns = {
+      resolve,
+    }
+    this.node = createNode({
+      storage: this,
+      dns: this.dns,
+    });
   }
 
-  async getStorage(key: string, secretKey: string) {
+  async getStorage(key: string): Promise<any> {
     return await RandomAccess.mount({
       name: key,
       storeName: 'data',
@@ -47,19 +87,20 @@ export default class DatLibrary {
   }
 
   getArchiveState(key) {
-    const open = this.openArchives.has(key)
+    const info = this.node._dats[key];
+    const open = info && info.isSwarming
     const state: ArchiveMetadata = this.archives[key] || { open, isOwner: false, key, created: Date.now(), lastUsed: 0 };
-    if (state.open) {
-      const archive = this.openArchives.get(key);
+    if (open) {
+      const drive = info.dataStructure
       state.content = {
-        length: archive._archive.content.length,
-        byteLength: archive._archive.content.byteLength,
-        downloaded: archive._archive.content.downloaded(),
+        length: drive.content.length,
+        byteLength: drive.content.byteLength,
+        downloaded: drive.content.downloaded(),
       };
       state.metadata = {
-        length: archive._archive.metadata.length,
-        byteLength: archive._archive.metadata.byteLength,
-        downloaded: archive._archive.metadata.downloaded(),
+        length: drive.metadata.length,
+        byteLength: drive.metadata.byteLength,
+        downloaded: drive.metadata.downloaded(),
       };
     }
     return state;
@@ -78,32 +119,29 @@ export default class DatLibrary {
   }
 
   closeArchive(key) {
-    if (this.openArchives.has(key)) {
-      const archive = this.openArchives.get(key);
-      archive.close();
-      this.openArchives.delete(key);
+    if (this.node._dats[key]) {
+      this.node.closeArchive(key);
     }
   }
 
   async deleteArchive(key) {
-    if (this.openArchives.has(key)) {
+    if (this.node._dats[key]) {
       throw 'Cannot delete an open archive';
     }
     window.indexedDB.deleteDatabase(key);
-    delete this.archives[key];
     return this._persistArchives();
   }
 
-  async _addLibraryEntry(archive) {
-    const key = archive._archive.key.toString('hex');
+  async _addLibraryEntry(archive: DatArchive) {
+    const key = archive._dataStructure.key.toString('hex');
     if (!this.archives[key]) {
       this.archives[key] = {
         key,
         open: true,
         created: Date.now(),
         lastUsed: Date.now(),
-        isOwner: archive._archive.writable,
-        inLibrary: archive._archive.writable,
+        isOwner: archive._dataStructure.writable,
+        inLibrary: archive._dataStructure.writable,
       };
       try {
         const { title, description, type } = await archive.getInfo({ timeout: 30000 });
@@ -116,34 +154,34 @@ export default class DatLibrary {
     }
   }
 
-  _touchLibraryEntry(archive) {
-    if (!archive._archive) {
+  _touchLibraryEntry(archive: DatArchive) {
+    if (!archive._dataStructure) {
       return;
     }
-    const key = archive._archive.key.toString('hex');
+    const key = archive._dataStructure.key.toString('hex');
     if (this.archives[key]) {
       this.archives[key].lastUsed = Date.now();
     }
   }
 
-  async getArchive(addr) {
-    const key = await DatArchive.resolveName(`dat://${addr}`);
-    let archive;
-
-    if (!this.openArchives.has(key)) {
-      archive = new DatArchive(`dat://${addr}`)
-      this.openArchives.set(key, archive);
-      await archive._loadPromise;
-      this._addLibraryEntry(archive);
-    }
-    archive = this.openArchives.get(key);
-    this._touchLibraryEntry(archive);
-    return archive;
+  async getArchive(addr: string) {
+    return this.getArchiveFromUrl(`dat://${addr}`);
   }
 
-  async getArchiveFromUrl(url) {
-    const { host } = parseUrl(url);
-    return this.getArchive(host);
+  async getArchiveFromUrl(url: string) {
+    const key = await this.dns.resolve(url);
+    const existing = key in this.node._dats;
+    try {
+      const archive = await this.node.getArchive(`dat://${key}`);
+
+      if (!existing) {
+        this._addLibraryEntry(archive);
+      }
+      this._touchLibraryEntry(archive);
+      return archive;
+    } catch (e) {
+      console.error(e);
+    }
   }
 
 

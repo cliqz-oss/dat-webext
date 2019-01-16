@@ -27,3 +27,4 @@ declare module '@sammacbeth/dat-archive-web' {
     constructor(url: string)
   }
 }
+

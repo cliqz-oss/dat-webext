@@ -1,7 +1,6 @@
 import Spanan from 'spanan';
-import { DatArchive } from './dat';
+import { DatArchive, CreateOptions, SelectArchiveOptions } from './dat';
 import dialog from './dialog';
-import { CreateOptions, SelectArchiveOptions } from './dat-archive';
 import DatLibrary, { ArchiveMetadata } from './library';
 
 interface CloseableEventTarget extends EventTarget {
@@ -35,11 +34,11 @@ class DatApi {
 
     this.privateApi = {
       async create(opts: CreateOptions) {
-        const archive = await DatArchive.create(opts);
+        const archive = await library.node.createArchive(opts);
         return archive.url;
       },
       async fork(url, opts) {
-        const archive = await DatArchive.fork(url, opts);
+        const archive = await library.node.forkArchive(url, opts);
         return archive.url;
       },
       async dialogResponse(message) {
@@ -55,7 +54,7 @@ class DatApi {
 
     this.api = {
       resolveName(name) {
-        return DatArchive.resolveName(name);
+        return library.node.dns.resolve(name);
       },
       async create(opts: CreateOptions = {}) {
         return await dialog.open({
@@ -153,9 +152,9 @@ class DatApi {
       },
       async watch(url, pattern) {
         const archive = await getArchiveFromUrl(url);
-        const key = archive._archive.key.toString('hex');
+        const key = archive._dataStructure.key.toString('hex');
         const streamId = streamCtr++;
-        const stream = archive.createFileActivityStream(pattern);
+        const stream = archive.watch(pattern);
         listenerStreams.set(streamId, {
           stream,
           key,

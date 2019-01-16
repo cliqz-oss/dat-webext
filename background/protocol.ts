@@ -4,6 +4,7 @@ import { join as joinPaths } from 'path';
 import * as mime from 'mime';
 import { DNSLookupFailed } from './errors';
 import { Readable } from 'stream';
+import { DatArchive } from './dat';
 
 class StreamIterator {
 
@@ -80,7 +81,7 @@ function timeoutWithError(ms, errorCtr) {
 }
 
 async function* fileStream(archive, path) {
-  const stream = archive._archive.createReadStream(path, { start: 0 });
+  const stream = archive._dataStructure.createReadStream(path, { start: 0 });
   const streamIt = new StreamIterator(stream);
   while (true) {
     const next = await streamIt.next();
@@ -99,14 +100,14 @@ const ERROR = {
 
 class DatHandler {
 
-  getArchive: (addr: string) => Promise<any>
+  getArchiveFromUrl: (url: string) => Promise<any>
 
-  constructor(getArchive) {
-    this.getArchive = getArchive;
+  constructor(getArchiveFromUrl) {
+    this.getArchiveFromUrl = getArchiveFromUrl;
   }
 
-  async loadArchive(host: string, timeout = 30000) {
-    const loadArchive = this.getArchive(host);
+  async loadArchive(url: string, timeout = 30000): Promise<DatArchive> {
+    const loadArchive = this.getArchiveFromUrl(url);
     await Promise.race([
       loadArchive,
       timeoutWithError(timeout, () => new Error(ERROR.ARCHIVE_LOAD_TIMEOUT))
@@ -114,10 +115,10 @@ class DatHandler {
     return loadArchive;
   }
 
-  async resolvePath(host, pathname, version) {
+  async resolvePath(url: string, host: string, pathname: string, version: number) {
     const timeoutAt = Date.now() + 30000;
-    const archive = await this.loadArchive(host);
-    const manifest = await pda.readManifest(archive._archive).catch(_ => ({ }));
+    const archive = await this.loadArchive(url);
+    const manifest = await pda.readManifest(archive._dataStructure).catch(_ => ({ }));
     const root = manifest.web_root || '';
     const path = decodeURIComponent(pathname);
     let lastPath;
@@ -181,7 +182,7 @@ class DatHandler {
       contentType: mime.getType(decodeURIComponent(pathname)) || 'text/html',
       content: (async function* () {
         try {
-          const { archive, path } = await self.resolvePath(host, pathname, version);
+          const { archive, path } = await self.resolvePath(request.url, host, pathname, version);
           const data = fileStream(archive, path);
           for await (const chunk of data) {
             yield chunk;

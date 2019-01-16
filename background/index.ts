@@ -1,6 +1,5 @@
 import DatHandler from './protocol';
 import DatLibrary from './library';
-import { initManager } from './dat';
 import DatApi from './api';
 
 browser.processScript.setAPIScript(browser.runtime.getURL('web-api.js'));
@@ -12,12 +11,15 @@ const CLOSE_ARCHIVES_AFTER_MS = 1000 * 60 * 10;
 
 const library = new DatLibrary();
 library.init();
-initManager(library);
 (<any>window).library = library;
 
-const getArchive = library.getArchive.bind(library);
+window.addEventListener('beforeunload', () => {
+  library.node.close();
+})
 
-const protocolHandler = new DatHandler(getArchive);
+const getArchiveFromUrl = library.getArchiveFromUrl.bind(library);
+
+const protocolHandler = new DatHandler(getArchiveFromUrl);
 browser.protocol.registerProtocol('dat', (request) => {
   return protocolHandler.handleRequest(request);
 });
