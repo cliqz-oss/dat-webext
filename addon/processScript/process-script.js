@@ -48,13 +48,14 @@ function forEachTab(fn) {
     if (window.gBrowser && window.gBrowser.tabs) {
       // this is a browser (chrome) window so we need to inject the
       // content scripts in all openend tabs
-      window.gBrowser.tabs.forEach((tab) => {
+      const tabs = window.gBrowser.tabs;
+      for (let i = 0; i < tabs.length; i += 1) {
         try {
-          fn(tab.linkedBrowser.contentDocument);
+          fn(tabs[i].linkedBrowser.contentDocument);
         } catch (e) {
           // failed to load into existing window
         }
-      });
+      }
     } else {
       // this is a content window so we need to inject content scripts directly
       try {
