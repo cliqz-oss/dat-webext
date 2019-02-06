@@ -196,6 +196,10 @@ class DatHandler {
             return;
           } else if (e.message === ERROR.NOT_FOUND) {
             yield responseText(`Not found: ${e.toString()}`);
+          } else if (e.message === ERROR.DIRECTORY) {
+            const req = await fetch('/pages/directory.html');
+            const contents = await req.text();
+            yield responseText(contents);
           } else {
             console.error(e);
             yield responseText(`Unexpected error: ${e.toString()}`);

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dat Directory</title>
+</head>
+<body>
+  <h2 id="title">Listing directory</h2>
+  <ul id="listing"></ul>
+  <script>
+    const url = new URL(document.location);
+    const archive = new DatArchive(document.location);
+    const path = url.pathname.endsWith('/') ? url.pathname : `${url.pathname}/`;
+
+    const levels = ['bytes', 'kb', 'mb', 'gb']
+    function getSize(unit, level = 0) {
+      if (unit < 1024 || level === levels.length - 1) {
+        return `${unit}${levels[level]}`;
+      } else {
+        const next = Math.round(unit / 1024);
+        return getSize(next, level + 1);
+      }
+    }
+
+    document.getElementById('title').innerText = `Listing directory ${path}`;
+    archive.readdir(path, { stat: true }).then((files) => {
+      const list = document.getElementById('listing');
+      files.forEach(({ name, stat }) => {
+        const item = document.createElement('li');
+        if (stat.isDirectory()) {
+          item.innerHTML = `<a href="${path}${name}/">${name}/</a>`;
+        } else {
+          item.innerHTML = `<a href="${path}${name}">${name}</a> (${getSize(stat.size)})`
+        }
+        list.appendChild(item);
+      });
+    })
+  </script>
+</body>
+</html>
