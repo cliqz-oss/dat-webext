@@ -31,8 +31,8 @@ const api = new DatApi(library);
 library.getArchives().filter(a => a.isOwner).forEach((a) => library.getArchive(a.key));
 
 // manage open archives
-setInterval(() => {
-  const archives = library.getArchivesStates();
+setInterval(async () => {
+  const archives = await library.getArchivesStates();
   // get archives which have active listeners
   const activeStreams = new Set();
   api.listenerStreams.forEach(({ key }) => activeStreams.add(key));

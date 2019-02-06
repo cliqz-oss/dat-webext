@@ -48,7 +48,7 @@ async function setupForm() {
     onSubmit(() => {
       return api.privateApi.create({
         title: title.value,
-        desc: desc.value,
+        description: desc.value,
       }).then(url => (
         api.privateApi.dialogResponse({
           dialogId: id,
@@ -91,13 +91,20 @@ async function setupForm() {
   } else if (action === 'selectArchive') {
     const library = await api.privateApi.listLibrary(opts.filters);
     const archiveList = document.getElementById('archives');
-    library.forEach(async ({ key, title, description }) => {
+    library.forEach(async ({ key, title, description, isOwner }) => {
       const template = document.createElement('template');
-      template.innerHTML = `<a class="list-group-item list-group-item-action flex-column align-items-start" href="#">
-                <h5>${title || 'unnamed'}</h5>
-                <small>dat://${key.substring(0, 5)}...${key.substring(60)}</small>
-                <p>${description || ''}</p>
-            </a>`;
+      template.innerHTML = `<div class="card">
+        <div class="card-content">
+          <p class="title is-4">${title || 'unnamed'}</p>
+          <div class="subtitle is-6">
+            <p>dat://${key.substring(0, 5)}...${key.substring(60)}</p>
+            <span class="tag is-info">
+              ${isOwner ? "Writable" : "Read-only"}
+            </span>
+          </div>
+          <div class="content">${description || ''}</div>
+        </div>
+      </div>`;
       const elem = template.content.firstChild;
       archiveList.appendChild(elem);
       elem.onclick = () => {

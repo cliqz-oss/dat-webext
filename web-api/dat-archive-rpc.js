@@ -78,6 +78,9 @@ module.exports = function (rpc, eventBus) {
     }
 
     static async fork(url, opts) {
+      if (typeof url === 'object') {
+        url = url.url;
+      }
       return rpc.fork(url, opts).then(newUrl => new DatArchive(newUrl));
     }
 

@@ -10,7 +10,7 @@ export default {
       type: 'popup',
       url: `/pages/dialog.html#${JSON.stringify(message)}`,
       width: 500,
-      height: 400,
+      height: 500,
     });
     return new Promise((resolve, reject) => {
       const onWindowRemoved = (windowId) => {

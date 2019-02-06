@@ -35,10 +35,13 @@ class DatApi {
     this.privateApi = {
       async create(opts: CreateOptions) {
         const archive = await library.node.createArchive(opts);
+        library._addLibraryEntry(archive);
         return archive.url;
       },
       async fork(url, opts) {
-        const archive = await library.node.forkArchive(url, opts);
+        const addr = await library.node.dns.resolve(url);
+        const archive = await library.node.forkArchive(addr, opts);
+        library._addLibraryEntry(archive);
         return archive.url;
       },
       async dialogResponse(message) {

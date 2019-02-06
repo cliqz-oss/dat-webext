@@ -86,7 +86,7 @@ export default class DatLibrary implements DatStorage {
     this.storageLock = browser.storage.local.set({ [ARCHIVE_LIST_KEY]: this.archives });
   }
 
-  getArchiveState(key) {
+  async getArchiveState(key) {
     const info = this.node._dats[key];
     const open = info && info.isSwarming
     const state: ArchiveMetadata = this.archives[key] || { open, isOwner: false, key, created: Date.now(), lastUsed: 0 };
@@ -103,6 +103,11 @@ export default class DatLibrary implements DatStorage {
         byteLength: drive.metadata.byteLength,
         downloaded: drive.metadata.downloaded(),
       };
+      const archive = await this.node.getArchive(`dat://${key}`);
+      const { title, description, type } = await archive.getInfo({ timeout: 30000 });
+      state.title = title;
+      state.description = description;
+      state.type = type;
     }
     return state;
   }
@@ -112,11 +117,15 @@ export default class DatLibrary implements DatStorage {
   }
 
   getLibraryArchives() {
-    return this.getArchives().filter(({ inLibrary }) => inLibrary);
+    return Promise.all(
+      this.getArchives()
+      .filter(({ inLibrary }) => inLibrary)
+      .map(state => this.getArchiveState(state.key))
+    );
   }
 
   getArchivesStates() {
-    return Object.keys(this.archives).map(key => this.getArchiveState(key));
+    return Promise.all(Object.keys(this.archives).map(key => this.getArchiveState(key)));
   }
 
   closeArchive(key) {
@@ -163,6 +172,7 @@ export default class DatLibrary implements DatStorage {
     const key = archive._dataStructure.key.toString('hex');
     if (this.archives[key]) {
       this.archives[key].lastUsed = Date.now();
+      this._persistArchives();
     }
   }
 
@@ -172,7 +182,7 @@ export default class DatLibrary implements DatStorage {
 
   async getArchiveFromUrl(url: string) {
     const key = await this.dns.resolve(url);
-    const existing = key in this.node._dats;
+    const existing = key in this.archives;
     try {
       const archive = await this.node.getArchive(`dat://${key}`);
 
