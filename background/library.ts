@@ -90,6 +90,7 @@ export default class DatLibrary implements DatStorage {
     const info = this.node._dats[key];
     const open = info && info.isSwarming
     const state: ArchiveMetadata = this.archives[key] || { open, isOwner: false, key, created: Date.now(), lastUsed: 0 };
+    state.open = !!open;
     if (open) {
       const drive = info.dataStructure
       state.content = {
@@ -129,6 +130,7 @@ export default class DatLibrary implements DatStorage {
       throw 'Cannot delete an open archive';
     }
     window.indexedDB.deleteDatabase(key);
+    delete this.archives[key]
     return this._persistArchives();
   }
 
