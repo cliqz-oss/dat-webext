@@ -2,9 +2,47 @@ import * as parseUrl from 'parse-dat-url';
 import { DNSLookupFailed } from './errors';
 
 const datUrlMatcher = /^[0-9a-f]{64}$/;
-const lookupCache = new Map();
-
 const proxyUrl = 'https://dat-dns.now.sh';
+
+interface CacheEntry extends browser.storage.StorageObject {
+  host: string
+  address: string
+  expires: number
+}
+
+class DNSCache {
+  cache: Map<string, CacheEntry>
+
+  constructor() {
+    this.cache = new Map();
+  }
+
+  async get(host: string): Promise<CacheEntry> {
+    if (this.cache.has(host)) {
+      return this.cache.get(host);
+    }
+    const key = `dns/${host}`
+    const results: { [k: string]: CacheEntry } = await browser.storage.local.get(key);
+    const stored: CacheEntry = results[key];
+    if (stored) {
+      this.cache.set(host, stored);
+      return stored;
+    }
+    return null;
+  }
+
+  async set(entry: CacheEntry) {
+    this.cache.set(entry.host, entry);
+    return browser.storage.local.set({ [`dns/${entry.host}`]: entry });
+  }
+
+  async delete(host) {
+    this.cache.delete(host);
+    return browser.storage.local.remove(`dns/${host}`);
+  }
+}
+
+const lookupCache = new DNSCache();
 
 export default async function resolve(url: string): Promise<string> {
   const { host } = parseUrl(url);
@@ -15,14 +53,12 @@ export default async function resolve(url: string): Promise<string> {
     throw new DNSLookupFailed('Could not parse URL');
   }
   // check for cached lookup
-  const cached = lookupCache.get(host);
-  if (cached) {
-    if (cached.expires > Date.now()) {
-      return cached.address;
-    } else {
-      lookupCache.delete(host);
-    }
+  const cached = await lookupCache.get(host);
+  const cacheExpired = !cached || cached.expires < Date.now()
+  if (!cacheExpired) {
+    return cached.address;
   }
+
   // check via fetch
   try {
     const wellKnownUrl = `${proxyUrl}/${host}/.well-known/dat`
@@ -34,12 +70,16 @@ export default async function resolve(url: string): Promise<string> {
     if (addr.startsWith('dat://')) {
       addr = addr.substring(6);
       const iTtl = ttl.startsWith('TTL=') || ttl.startsWith('ttl=') ? parseInt(ttl.substring(4)) : 3600;
-      lookupCache.set(host, { address: addr, expires: Date.now() + (iTtl * 1000) });
+      lookupCache.set({ host, address: addr, expires: Date.now() + (iTtl * 1000) });
       return addr;
     } else {
       throw new DNSLookupFailed(host);
     }
   } catch (e) {
+    if (cached) {
+      // use outdated cache entry
+      return cached.address;
+    }
     throw new DNSLookupFailed(host);
   }
   return null;

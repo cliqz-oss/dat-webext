@@ -189,7 +189,7 @@ class DatHandler {
           }
         } catch (e) {
           if (e instanceof DNSLookupFailed) {
-            yield responseText(`DNS Lookup failed for ${e.message}`);
+            yield responseText(`Dat DNS Lookup failed for ${e.message}`);
             return;
           } else if (e.message === ERROR.ARCHIVE_LOAD_TIMEOUT) {
             yield responseText('Unable locate the Dat archive on the network.');
