@@ -9,7 +9,8 @@
     "build:background": "webextify -r fs:graceful-fs -e background/index.ts -p tsify > addon/background.js",
     "build:webapi": "browserify -e ./web-api/web-api.js > addon/web-api.js",
     "start": "env MOZ_DISABLE_CONTENT_SANDBOX=1 web-ext run -s addon --firefox=firefoxdeveloperedition --no-reload",
-    "postinstall": "./copy-assets.sh"
+    "postinstall": "./copy-assets.sh",
+    "package": "web-ext build -s ./addon/"
   },
   "author": "Sam Macbeth",
   "license": "MIT",
