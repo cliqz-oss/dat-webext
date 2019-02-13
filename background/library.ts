@@ -4,6 +4,7 @@ import { DatArchive, Hyperdrive, CreateOptions } from './dat';
 import resolve from './dns';
 
 const ARCHIVE_LIST_KEY = 'archives';
+const DEFAULT_SEED_TIME = 1e3 * 60 * 10; // 10 mins
 
 export interface ArchiveMetadata extends browser.storage.StorageObject {
   isOwner: boolean
@@ -13,6 +14,8 @@ export interface ArchiveMetadata extends browser.storage.StorageObject {
   lastUsed: number,
   content?: {}
   metadata?: {}
+  forceSeeding: boolean
+  seedUntil: number
 }
 
 export interface Archives extends browser.storage.StorageObject {
@@ -89,7 +92,10 @@ export default class DatLibrary implements DatStorage {
   async getArchiveState(key) {
     const info = this.node._dats[key];
     const open = info && info.isSwarming
-    const state: ArchiveMetadata = this.archives[key] || { open, isOwner: false, key, created: Date.now(), lastUsed: 0 };
+    const state: ArchiveMetadata = this.archives[key];
+    if (!state) {
+      return null;
+    }
     state.open = !!open;
     if (open) {
       const drive = info.dataStructure
@@ -153,6 +159,8 @@ export default class DatLibrary implements DatStorage {
         lastUsed: Date.now(),
         isOwner: archive._dataStructure.writable,
         inLibrary: archive._dataStructure.writable,
+        forceSeeding: false,
+        seedUntil: Date.now() + DEFAULT_SEED_TIME,
       };
       try {
         const { title, description, type } = await archive.getInfo({ timeout: 30000 });
@@ -172,6 +180,10 @@ export default class DatLibrary implements DatStorage {
     const key = archive._dataStructure.key.toString('hex');
     if (this.archives[key]) {
       this.archives[key].lastUsed = Date.now();
+      this.archives[key].seedUntil = Math.max(
+        this.archives[key].seedUntil, 
+        this.archives[key].lastUsed + DEFAULT_SEED_TIME
+      );
       this._persistArchives();
     }
   }

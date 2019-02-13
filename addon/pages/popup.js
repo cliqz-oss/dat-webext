@@ -1,4 +1,4 @@
-const { api } = browser.extension.getBackgroundPage();
+const { api, library } = browser.extension.getBackgroundPage();
 
 async function getTab() {
   const tabs = await browser.tabs.query({ active: true, currentWindow: true });
@@ -15,6 +15,8 @@ function getSize(size, unit = 0) {
 }
 
 getTab().then(async (tab) => {
+  const peerInfo = document.getElementById('dat-peers');
+  const seedingButton = document.getElementById('dat-switch-seeding');
 
   document.getElementById('dat-fork').addEventListener('click', () => {
     api.privateApi.forkAndLoad(tab.url, {})
@@ -23,8 +25,27 @@ getTab().then(async (tab) => {
     api.privateApi.download(tab.url)
   });
 
-  const { title, description, peers, size } = await api.api.getInfo(tab.url);
+  const { title, description, peers, size, key, isOwner } = await api.api.getInfo(tab.url);
+  const { forceSeeding } = await library.getArchiveState(key);
+
   document.getElementById('dat-title').innerText = title;
-  document.getElementById('dat-desc').innerText = description;
-  document.getElementById('dat-peers').innerText = `${peers} peers | ${getSize(size)} on disk`;
+  if (description) {
+    document.getElementById('dat-desc').innerText = description;
+  }
+  peerInfo.innerText = `${peers} peers | ${getSize(size)} on disk`;
+  if (isOwner) {
+    peerInfo.innerHTML += ' | <span class="tag is-info">Writable</span>';
+  }
+  if (isOwner || forceSeeding) {
+    seedingButton.setAttribute('checked', 'checked');
+    if (isOwner) {
+      seedingButton.setAttribute('disabled', true);
+    }
+  }
+
+  seedingButton.addEventListener('change', async (ev) => {
+    const state = await library.getArchiveState(key);
+    state.forceSeeding = seedingButton.checked;
+    library._persistArchives();
+  })
 });
