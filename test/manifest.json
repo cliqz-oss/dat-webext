@@ -48,6 +48,14 @@
                 "script": "../addon/libdweb/TCPSocket/Socket.js"
             }
         },
+        "UDPSocket": {
+            "schema": "../addon/libdweb/UDPSocket/UDPSocket.json",
+            "child": {
+              "scopes": ["addon_child"],
+              "paths": [["UDPSocket"]],
+              "script": "../addon/libdweb/UDPSocket/Socket.js"
+            }
+        },
         "DNS": {
             "schema": "../addon/libdweb/dns/dns.json",
             "parent": {

@@ -5,3 +5,4 @@ addon/assets/*
 addon/background.js
 addon/web-api.js
 web-ext-artifacts
+test/test-bundle.js
