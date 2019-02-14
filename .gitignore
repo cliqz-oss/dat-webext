@@ -1,6 +1,7 @@
 node_modules/
 addon/libdweb
-addon/assets
+addon/assets/*
+!addon/assets/dat-hexagon.svg
 addon/background.js
 addon/web-api.js
 web-ext-artifacts

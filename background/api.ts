@@ -19,6 +19,8 @@ class DatApi {
     dialogResponse(message: any): void
     getArchive(url: string): Promise<DatArchive>
     listLibrary(): Promise<ArchiveMetadata[]>
+    download(url: string): Promise<void>
+    forkAndLoad(url: string, opts: CreateOptions): Promise<void>
   }
   api: any
 
@@ -53,6 +55,24 @@ class DatApi {
       async listLibrary() {
         return library.getLibraryArchives();
       },
+      async download(url: string) {
+        const archive = await getArchiveFromUrl(url);
+        await archive.download();
+      },
+      async forkAndLoad(url: string, opts: CreateOptions) {
+        const addr = await dialog.open({
+          action: 'fork',
+          opts: {
+            url,
+            title: opts.title,
+            description: opts.description,
+          }
+        });
+        browser.tabs.create({
+          active: true,
+          url: addr,
+        });
+      }
     }
 
     this.api = {

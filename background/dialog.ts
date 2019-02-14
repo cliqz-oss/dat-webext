@@ -2,8 +2,20 @@
 let dialogCtr = 1;
 const dialogs = new Map();
 
+type DialogOpenMessage = {
+  id?: number
+  action: string
+  opts: {}
+}
+
+type DialogResponse = {
+  dialogId: number
+  result?: string
+  error?: string
+}
+
 export default {
-  async open(message) {
+  async open(message: DialogOpenMessage): Promise<string> {
     message.id = dialogCtr++;
     const win = await browser.windows.create({
       allowScriptsToClose: true,
@@ -13,7 +25,7 @@ export default {
       height: 500,
     });
     return new Promise((resolve, reject) => {
-      const onWindowRemoved = (windowId) => {
+      const onWindowRemoved = (windowId: number) => {
         if (windowId === win.id) {
           dialogs.delete(message.id);
           reject('Dialog closed');
@@ -32,7 +44,7 @@ export default {
       });
     });
   },
-  onMessage({ dialogId, result, error }) {
+  onMessage({ dialogId, result, error }: DialogResponse) {
     if (error) {
       dialogs.get(dialogId).reject(error);
     } else {

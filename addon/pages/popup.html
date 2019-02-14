@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Dat Info</title>
+        <link rel="stylesheet" href="../assets/bulma.css" />
+    </head>
+    <body class="container" style="width: 300px; margin-top: 0px">
+        <div class="card">
+            <div class="card-content">
+                <div class="content">
+                    <h4 class="title is-4" id="dat-title"></h4>
+                    <p class="subtitle is-6" id="dat-desc"></p>
+                    <p id="dat-peers"></p>
+                    <div class="field">
+                        <input class="checkbox" id="dat-switch-seeding" type="checkbox">
+                        <label for="dat-switch-seeding">Seeding?</label>
+                    </div>
+                </div>
+            </div>
+            <footer class="card-footer" id="footer-actions">
+                <a href="#" class="card-footer-item" id="dat-fork">Fork</a>
+                <a href="#" class="card-footer-item" id="dat-download">Download</a>
+            </footer>
+        </div>
+    </body>
+    <script src="./popup.js"></script>
+</html>

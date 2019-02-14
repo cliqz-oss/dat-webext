@@ -10,7 +10,15 @@ const CACHE_SIZE_MB = 10;
 const CLOSE_ARCHIVES_AFTER_MS = 1000 * 60 * 10;
 
 const library = new DatLibrary();
-library.init();
+library.init().then(() => {
+  // load my own archives and seeding archives
+  library.getArchives().filter(a => a.isOwner || a.forceSeeding)
+  .forEach((a) => {
+    console.log('load', a.key);
+    library.getArchive(a.key)
+  });
+});
+
 (<any>window).library = library;
 
 window.addEventListener('beforeunload', () => {
@@ -27,8 +35,7 @@ browser.protocol.registerProtocol('dat', (request) => {
 const api = new DatApi(library);
 (<any>window).api = api;
 
-// load my own archives
-library.getArchives().filter(a => a.isOwner).forEach((a) => library.getArchive(a.key));
+
 
 // manage open archives
 setInterval(async () => {
@@ -37,8 +44,12 @@ setInterval(async () => {
   const activeStreams = new Set();
   api.listenerStreams.forEach(({ key }) => activeStreams.add(key));
 
-  const closeCutoff = Date.now() - CLOSE_ARCHIVES_AFTER_MS
-  archives.filter((a) => a.open && !a.isOwner && !activeStreams.has(a.key) && a.lastUsed < closeCutoff).forEach((a) => {
+  archives.filter((a) => a.open && 
+    !a.isOwner && 
+    !activeStreams.has(a.key) && 
+    !a.forceSeeding &&
+    a.seedUntil < Date.now())
+  .forEach((a) => {
     library.closeArchive(a.key);
   });
   const calculateUsage = (type) => type ? (type.downloaded / type.length) * type.byteLength : 0;
@@ -60,3 +71,11 @@ setInterval(async () => {
     }
   }
 }, 60000);
+
+browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (tab.url && tab.url.startsWith('dat://')) {
+    browser.pageAction.show(tabId);
+  } else {
+    browser.pageAction.hide(tabId);
+  }
+});

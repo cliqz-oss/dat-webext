@@ -12,7 +12,9 @@
     },
     "permissions": [
         "storage",
-        "unlimitedStorage"
+        "unlimitedStorage",
+        "tabs",
+        "<all_urls>"
     ],
     "experiment_apis": {
         "protocol": {
@@ -61,5 +63,11 @@
               "script": "libdweb/dns/dns.js"
             }
         }
+    },
+    "page_action": {
+        "browser_style": false,
+        "default_icon": "assets/dat-hexagon.svg",
+        "default_title": "Dat",
+        "default_popup": "pages/popup.html"
     }
 }
