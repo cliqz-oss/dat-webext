@@ -1,6 +1,6 @@
 {
   "name": "dat-webext",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "scripts": {
     "build:test": "webextify -r fs:graceful-fs -e test/test.ts -p tsify > test/test-bundle.js",
