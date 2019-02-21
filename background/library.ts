@@ -1,7 +1,11 @@
+import { EventEmitter } from 'events';
 import * as RandomAccess from '@sammacbeth/random-access-idb-mutable-file';
 import { createNode } from '@sammacbeth/dat-node';
 import { DatArchive, Hyperdrive, CreateOptions } from './dat';
 import resolve from './dns';
+
+// suppress listener warnings
+EventEmitter.defaultMaxListeners = 100;
 
 const ARCHIVE_LIST_KEY = 'archives';
 const DEFAULT_SEED_TIME = 1e3 * 60 * 10; // 10 mins

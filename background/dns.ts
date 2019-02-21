@@ -1,4 +1,5 @@
 import * as parseUrl from 'parse-dat-url';
+import * as datDnsFactory from 'dat-dns';
 import { DNSLookupFailed } from './errors';
 
 const datUrlMatcher = /^[0-9a-f]{64}$/;
@@ -40,9 +41,30 @@ class DNSCache {
     this.cache.delete(host);
     return browser.storage.local.remove(`dns/${host}`);
   }
+
+  write(host: string, address: string, ttl: number) {
+    return this.set({
+      host,
+      address,
+      expires: Date.now() + (ttl * 1000),
+    });
+  }
+
+  async read(host: string, err: any) {
+    const res = await this.get(host);
+    if (res) {
+      return res.address;
+    }
+    throw err;
+  }
 }
 
 const lookupCache = new DNSCache();
+const datDns = datDnsFactory({
+  persistentCache: lookupCache,
+  dnsHost: 'dns.quad9.net',
+  dnsPath: '/dns-query',
+});
 
 export default async function resolve(url: string): Promise<string> {
   const { host } = parseUrl(url);
@@ -59,7 +81,14 @@ export default async function resolve(url: string): Promise<string> {
     return cached.address;
   }
 
-  // check via fetch
+  // check via Dat-DNS
+  try {
+    const addr = await datDns.resolveName(host);
+    return addr;
+  } catch (e) {
+  }
+
+  // check via fetch - backup for when CORS prevents fetch.
   try {
     const wellKnownUrl = `${proxyUrl}/${host}/.well-known/dat`
     const response = await fetch(wellKnownUrl, {
