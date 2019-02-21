@@ -81,9 +81,9 @@ export default async function resolve(url: string): Promise<string> {
     return cached.address;
   }
 
-  // check via DNS
+  // check via Dat-DNS
   try {
-    const addr = await datDns.resolveName(host, { noWellknownDat: false });
+    const addr = await datDns.resolveName(host);
     return addr;
   } catch (e) {
   }
