@@ -44,7 +44,7 @@ interface DatInfo {
   replicationStreams?: any[]
 }
 
-interface DatNode {
+interface DatNode extends EventEmitter {
   storage: DatStorage
   dns: DatDNS
   _dats: {
@@ -71,9 +71,29 @@ export default class DatLibrary implements DatStorage {
     this.dns = {
       resolve,
     }
-    this.node = createNode({
-      storage: this,
-      dns: this.dns,
+    this._createNode();
+  }
+
+  _createNode() {
+    if (window.navigator.platform.startsWith('Win')) {
+      this.node = createNode({
+        storage: this,
+        dns: this.dns,
+        autoListen: true,
+      });
+    } else {
+      console.warn('Falling back to discovery-swarm-stream');
+      this.node = createNode({
+        storage: this,
+        dns: this.dns,
+        autoListen: false,
+        dss: 'wss://discovery.dat-web.eu',
+      });
+    }
+    this.node.on('error', (err) => {
+      console.warn('node error', err);
+      setTimeout(() => this._createNode(), 5000);
+      this.node.close();
     });
   }
 
@@ -185,7 +205,7 @@ export default class DatLibrary implements DatStorage {
     if (this.archives[key]) {
       this.archives[key].lastUsed = Date.now();
       this.archives[key].seedUntil = Math.max(
-        this.archives[key].seedUntil, 
+        this.archives[key].seedUntil,
         this.archives[key].lastUsed + DEFAULT_SEED_TIME
       );
       this._persistArchives();
