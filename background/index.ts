@@ -58,13 +58,11 @@ setInterval(async () => {
     .filter(a => !a.isOwner)
     .map(a => ({ key: a.key, size: (calculateUsage(a.metadata) + calculateUsage(a.content)) / mb }));
   const totalUsage = usage.reduce((acc, a) => acc + (a.size || 0), 0);
-  console.log('data usage', usage, totalUsage);
   // prune data
   if (totalUsage > CACHE_SIZE_MB) {
     const pruneable = archives
       .filter(a => !a.open && !a.isOwner && !activeStreams.has(a.key))
       .sort((a, b) => a.lastUsed - b.lastUsed);
-    console.log('over limit', pruneable);
     if (pruneable.length > 0) {
       console.log('prune archive', pruneable[0].key);
       library.deleteArchive(pruneable[0].key);
