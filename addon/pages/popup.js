@@ -5,11 +5,11 @@ async function getTab() {
   return tabs[0];
 }
 
-const units = ['bytes', 'kb', 'mb', 'gb'];
+const units = ['bytes', 'kB', 'MB', 'GB', 'TB'];
 
 function getSize(size, unit = 0) {
-  if (size > 1024 && unit < units.length - 1) {
-    return getSize(size / 1024, unit + 1);
+  if (size > 1000 && unit < units.length - 1) {
+    return getSize(size / 1000, unit + 1);
   }
   return `${Math.round(size * 10) / 10} ${units[unit]}`;
 }
