@@ -12,12 +12,12 @@
     const archive = new DatArchive(document.location);
     const path = url.pathname.endsWith('/') ? url.pathname : `${url.pathname}/`;
 
-    const levels = ['bytes', 'kb', 'mb', 'gb']
+    const levels = ['bytes', 'kB', 'MB', 'GB', 'TB']
     function getSize(unit, level = 0) {
-      if (unit < 1024 || level === levels.length - 1) {
-        return `${unit}${levels[level]}`;
+      if (unit < 1000 || level === levels.length - 1) {
+        return `${unit} ${levels[level]}`;
       } else {
-        const next = Math.round(unit / 1024);
+        const next = Math.round(unit / 1000);
         return getSize(next, level + 1);
       }
     }
