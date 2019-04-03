@@ -15,11 +15,12 @@ node('docker') {
             sh 'rm -r ./web-ext-artifacts'
             sh 'cp -r /app/node_modules ./'
             sh 'npm run postinstall'
+            sh 'node update_version.js'
             sh 'npm run build'
             sh 'npm run package'
         }
 
-        if (env.BRANCH_NAME == 'master') {
+        if (env.TAG_NAME != null) {
             stage('Sign and publish') {
                 withS3Credentials {
                     // get the name of the firefox build

@@ -8,7 +8,9 @@
         }
     },
     "background": {
-        "scripts": ["background.js"]
+        "scripts": [
+            "background.js"
+        ]
     },
     "permissions": [
         "storage",
@@ -20,47 +22,85 @@
         "protocol": {
             "schema": "libdweb/protocol/protocol.json",
             "child": {
-                "scopes": ["addon_child"],
-                "paths": [["protocol"]],
+                "scopes": [
+                    "addon_child"
+                ],
+                "paths": [
+                    [
+                        "protocol"
+                    ]
+                ],
                 "script": "libdweb/protocol/client.js"
             },
             "parent": {
-                "events": ["startup"],
-                "scopes": ["addon_parent"],
-                "paths": [["protocol"]],
+                "events": [
+                    "startup"
+                ],
+                "scopes": [
+                    "addon_parent"
+                ],
+                "paths": [
+                    [
+                        "protocol"
+                    ]
+                ],
                 "script": "libdweb/protocol/host.js"
             }
         },
         "processScript": {
             "schema": "processScript/schema.json",
             "parent": {
-                "scopes": ["addon_parent"],
-                "paths": [["processScript"]],
+                "scopes": [
+                    "addon_parent"
+                ],
+                "paths": [
+                    [
+                        "processScript"
+                    ]
+                ],
                 "script": "processScript/host.js"
             }
         },
         "TCPSocket": {
             "schema": "libdweb/TCPSocket/TCPSocket.json",
             "child": {
-                "scopes": ["addon_child"],
-                "paths": [["TCPSocket"]],
+                "scopes": [
+                    "addon_child"
+                ],
+                "paths": [
+                    [
+                        "TCPSocket"
+                    ]
+                ],
                 "script": "libdweb/TCPSocket/Socket.js"
             }
         },
         "UDPSocket": {
             "schema": "libdweb/UDPSocket/UDPSocket.json",
             "child": {
-              "scopes": ["addon_child"],
-              "paths": [["UDPSocket"]],
-              "script": "libdweb/UDPSocket/Socket.js"
+                "scopes": [
+                    "addon_child"
+                ],
+                "paths": [
+                    [
+                        "UDPSocket"
+                    ]
+                ],
+                "script": "libdweb/UDPSocket/Socket.js"
             }
         },
         "DNS": {
             "schema": "libdweb/dns/dns.json",
             "parent": {
-              "scopes": ["addon_parent"],
-              "paths": [["DNS"]],
-              "script": "libdweb/dns/dns.js"
+                "scopes": [
+                    "addon_parent"
+                ],
+                "paths": [
+                    [
+                        "DNS"
+                    ]
+                ],
+                "script": "libdweb/dns/dns.js"
             }
         }
     },
