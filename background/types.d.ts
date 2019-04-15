@@ -6,7 +6,16 @@ declare namespace browser.processScript {
 
 declare namespace browser.test {
   interface Assert {
-    ok(v: boolean): void
+    fail(message?: string): void
+    ok(v: boolean, message?: string): void
+    equal(actual: any, expected: any, message?: string): void
+    notEqual(actual: any, expected: any, message?: string): void
+    deepEqual(actual: any, expected: any, message?: string): void
+    notDeepEqual(actual: any, expected: any, message?: string): void
+    deepLooseEqual(actual: any, expected: any, message?: string): void
+    notDeepLooseEqual(actual: any, expected: any, message?: string): void
+    throws(fn: Function, expected: RegExp|Function, message?: string): void
+    doesNotThrow(fn: Function, message?: string): void
   }
   function test(name: string, test: (assert: Assert) => Promise<void>): void
 }
