@@ -26,11 +26,14 @@ export interface Hyperdrive {
   writable: boolean
   content: Hypercore
   metadata: Hypercore
+  checkout(version: number): Hyperdrive
 }
 
 export interface DatArchive {
   url: string
   _dataStructure: Hyperdrive
+  _checkout: Hyperdrive
+  _version: number
   getInfo(opts?): Promise<any>
   stat(filepath: string, opts?): Promise<any>
   readdir(path: string, opts?)
