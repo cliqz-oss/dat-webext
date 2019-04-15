@@ -81,7 +81,7 @@ function timeoutWithError(ms, errorCtr) {
 }
 
 async function* fileStream(archive, path) {
-  const stream = archive._dataStructure.createReadStream(path, { start: 0 });
+  const stream = archive._checkout.createReadStream(path, { start: 0 });
   const streamIt = new StreamIterator(stream);
   while (true) {
     const next = await streamIt.next();
@@ -100,14 +100,14 @@ const ERROR = {
 
 class DatHandler {
 
-  getArchiveFromUrl: (url: string) => Promise<any>
+  getArchiveFromUrl: (url: string, version: number) => Promise<any>
 
   constructor(getArchiveFromUrl) {
     this.getArchiveFromUrl = getArchiveFromUrl;
   }
 
-  async loadArchive(url: string, timeout = 30000): Promise<DatArchive> {
-    const loadArchive = this.getArchiveFromUrl(url);
+  async loadArchive(url: string, version: number, timeout = 30000): Promise<DatArchive> {
+    const loadArchive = this.getArchiveFromUrl(url, version);
     await Promise.race([
       loadArchive,
       timeoutWithError(timeout, () => new Error(ERROR.ARCHIVE_LOAD_TIMEOUT))
@@ -115,10 +115,10 @@ class DatHandler {
     return loadArchive;
   }
 
-  async resolvePath(url: string, host: string, pathname: string, version: number) {
+  async resolvePath(url: string, pathname: string, version: number) {
     const timeoutAt = Date.now() + 30000;
-    const archive = await this.loadArchive(url);
-    const manifest = await pda.readManifest(archive._dataStructure).catch(_ => ({ }));
+    const archive = await this.loadArchive(url, version);
+    const manifest = await pda.readManifest(archive._checkout).catch(_ => ({ }));
     const root = manifest.web_root || '';
     const path = decodeURIComponent(pathname);
     let lastPath;
@@ -182,7 +182,7 @@ class DatHandler {
       contentType: mime.getType(decodeURIComponent(pathname)) || 'text/html',
       content: (async function* () {
         try {
-          const { archive, path } = await self.resolvePath(request.url, host, pathname, version);
+          const { archive, path } = await self.resolvePath(request.url, pathname, parseInt(version));
           const data = fileStream(archive, path);
           for await (const chunk of data) {
             yield chunk;

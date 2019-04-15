@@ -62,12 +62,14 @@ export default class DatLibrary implements DatStorage {
 
   storageLock: Promise<void>
   archives: Archives
+  dats: Map<string, DatArchive>
   node: DatNode
   dns: DatDNS
 
   constructor() {
     this.storageLock = Promise.resolve();
     this.archives = {};
+    this.dats = new Map();
     this.dns = {
       resolve,
     }
@@ -162,6 +164,9 @@ export default class DatLibrary implements DatStorage {
     if (this.node._dats[key]) {
       this.node.closeArchive(key);
     }
+    if (this.dats.has(key)) {
+      this.dats.delete(key);
+    }
   }
 
   async deleteArchive(key) {
@@ -216,11 +221,21 @@ export default class DatLibrary implements DatStorage {
     return this.getArchiveFromUrl(`dat://${addr}`);
   }
 
-  async getArchiveFromUrl(url: string) {
+  async getArchiveFromUrl(url: string, version?: number) {
     const key = await this.dns.resolve(url);
     const existing = key in this.archives;
     try {
-      const archive = await this.node.getArchive(`dat://${key}`);
+      let archive: DatArchive;
+      if (this.dats.has(key)) {
+        archive = this.dats.get(key);
+      } else {
+        archive = await this.node.getArchive(`dat://${key}`);
+        this.dats.set(key, archive);
+      }
+      if (archive._version !== version) {
+        archive._checkout = version ? archive._dataStructure.checkout(version) : archive._dataStructure;
+        archive._version = version || null;
+      }
 
       if (!existing) {
         this._addLibraryEntry(archive);
