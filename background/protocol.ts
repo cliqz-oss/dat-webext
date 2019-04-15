@@ -139,6 +139,12 @@ class DatHandler {
         path: lastPath,
       }
     }
+    if (await tryStat(joinPaths(root, `${path}.html`))) {
+      return {
+        archive,
+        path: lastPath,
+      }
+    }
     // for directories try to find an index file
     if (f && f.isDirectory()) {
       if (await tryStat(joinPaths(root, path, 'index.html'))) {
@@ -155,12 +161,6 @@ class DatHandler {
       }
       // error list directory
       throw new Error(ERROR.DIRECTORY);
-    }
-    if (await tryStat(joinPaths(root, `${path}.html`))) {
-      return {
-        archive,
-        path: lastPath,
-      }
     }
 
     if (manifest.fallback_page) {
