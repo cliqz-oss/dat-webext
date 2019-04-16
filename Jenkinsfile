@@ -12,7 +12,7 @@ node('docker') {
 
     img.inside() {
         stage('Build') {
-            sh 'rm -r ./web-ext-artifacts'
+            sh 'rm -rf ./web-ext-artifacts'
             sh 'cp -r /app/node_modules ./'
             sh 'npm run postinstall'
             sh 'node update_version.js'
