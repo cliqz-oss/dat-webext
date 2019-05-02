@@ -175,38 +175,44 @@ class DatHandler {
     throw new Error(ERROR.NOT_FOUND);
   }
 
-  handleRequest(request: browser.protocol.Request): browser.protocol.Response {
+  handleRequest(request: browser.protocol.Request): Response {
     const self = this;
     const { host, pathname, version } = parseUrl(request.url);
-    return {
-      contentType: mime.getType(decodeURIComponent(pathname)) || 'text/html',
-      content: (async function* () {
+    const body = new ReadableStream({
+      async start(controller) {
         try {
           const { archive, path } = await self.resolvePath(request.url, pathname, parseInt(version));
           const data = fileStream(archive, path);
           for await (const chunk of data) {
-            yield chunk;
+            controller.enqueue(chunk);
           }
         } catch (e) {
           if (e instanceof DNSLookupFailed) {
-            yield responseText(`Dat DNS Lookup failed for ${e.message}`);
+            controller.enqueue(`Dat DNS Lookup failed for ${e.message}`);
             return;
           } else if (e.message === ERROR.ARCHIVE_LOAD_TIMEOUT) {
-            yield responseText('Unable locate the Dat archive on the network.');
+            controller.enqueue('Unable locate the Dat archive on the network.');
             return;
           } else if (e.message === ERROR.NOT_FOUND) {
-            yield responseText(`Not found: ${e.toString()}`);
+            controller.enqueue(`Not found: ${e.toString()}`);
           } else if (e.message === ERROR.DIRECTORY) {
             const req = await fetch('/pages/directory.html');
             const contents = await req.text();
-            yield responseText(contents);
+            controller.enqueue(contents);
           } else {
             console.error(e);
-            yield responseText(`Unexpected error: ${e.toString()}`);
+            controller.enqueue(`Unexpected error: ${e.toString()}`);
           }
+        } finally {
+          controller.close();
         }
-      })(),
-    }
+      }
+    });
+    return new Response(body, {
+      headers: {
+        "content-type": mime.getType(decodeURIComponent(pathname)) || 'text/html'
+      }
+    });
   }
 }
 
