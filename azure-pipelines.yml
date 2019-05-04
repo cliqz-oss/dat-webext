@@ -25,3 +25,9 @@ steps:
 - script: 
     MOZ_BINARY=./firefox/firefox-bin npm run test | tap-xunit > ./test-results.xml
   displayName: 'Test'
+
+- task: PublishTestResults@2
+  condition: succeededOrFailed()
+  inputs:
+    testRunner: JUnit
+    testResultsFiles: './test-results.xml'
