@@ -16,7 +16,8 @@
         "storage",
         "unlimitedStorage",
         "tabs",
-        "<all_urls>"
+        "<all_urls>",
+        "dns"
     ],
     "experiment_apis": {
         "protocol": {

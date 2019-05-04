@@ -3,74 +3,8 @@ import * as pda from 'pauls-dat-api';
 import { join as joinPaths } from 'path';
 import * as mime from 'mime';
 import { DNSLookupFailed } from './errors';
-import { Readable } from 'stream';
 import { DatArchive } from './dat';
 
-class StreamIterator {
-
-  stream: Readable
-  state: string
-  chunks: Buffer[]
-  waitingResolve: (result: Buffer) => any
-  waitingReject: (error: any) => void
-  error: any
-
-  constructor(stream) {
-    this.stream = stream;
-    this.state = 'open';
-    this.chunks = [];
-    this.waitingResolve = null;
-    this.waitingReject = null;
-    stream.on('close', () => {
-      this.state = 'closed';
-      if (this.waitingResolve) {
-        this.waitingResolve(null);
-      }
-    });
-    stream.on('end', () => {
-      this.state = 'end';
-      if (this.waitingResolve) {
-        this.waitingResolve(null);
-      }
-    });
-    stream.on('error', (e) => {
-      this.state = 'error'
-      this.error = e;
-      if (this.waitingReject) {
-        this.waitingReject(this.error);
-      }
-    });
-    stream.on('data', (chunk) => {
-      if (this.waitingResolve !== null) {
-        const resolve = this.waitingResolve;
-        this.waitingReject = null;
-        this.waitingResolve = null;
-        resolve(chunk);
-      } else {
-        this.chunks.push(chunk);
-      }
-    });
-  }
-
-  async next(): Promise<Buffer> {
-    if (this.chunks.length > 0) {
-      return Promise.resolve(this.chunks.shift());
-    } else if (this.state === 'error') {
-      return Promise.reject(this.error);
-    } else if (this.state != 'open') {
-      return Promise.resolve(null);
-    }
-    return new Promise((resolve, reject) => {
-      this.waitingResolve = resolve;
-      this.waitingReject = reject;
-    });
-  }
-}
-
-function responseText(string: string) {
-  const encoder = new TextEncoder();
-  return encoder.encode(string).buffer;
-}
 
 function timeoutWithError(ms, errorCtr) {
   return new Promise((resolve, reject) => {
@@ -78,18 +12,6 @@ function timeoutWithError(ms, errorCtr) {
       reject(errorCtr());
     }, ms);
   })
-}
-
-async function* fileStream(archive, path) {
-  const stream = archive._checkout.createReadStream(path, { start: 0 });
-  const streamIt = new StreamIterator(stream);
-  while (true) {
-    const next = await streamIt.next();
-    if (!next) {
-      break;
-    }
-    yield next.buffer;
-  }
 }
 
 const ERROR = {
@@ -182,10 +104,19 @@ class DatHandler {
       async start(controller) {
         try {
           const { archive, path } = await self.resolvePath(request.url, pathname, parseInt(version));
-          const data = fileStream(archive, path);
-          for await (const chunk of data) {
+          const stream = archive._checkout.createReadStream(path, { start: 0 });
+          stream.on('close', () => {
+            controller.close();
+          });
+          stream.on('end', () => {
+            controller.close();
+          });
+          stream.on('error', (e) => {
+            controller.error(e);
+          });
+          stream.on('data', (chunk) => {
             controller.enqueue(chunk);
-          }
+          });
         } catch (e) {
           if (e instanceof DNSLookupFailed) {
             controller.enqueue(`Dat DNS Lookup failed for ${e.message}`);
@@ -203,7 +134,6 @@ class DatHandler {
             console.error(e);
             controller.enqueue(`Unexpected error: ${e.toString()}`);
           }
-        } finally {
           controller.close();
         }
       }
