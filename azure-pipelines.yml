@@ -15,14 +15,14 @@ steps:
     versionSpec: '10.x'
   displayName: 'Install Node.js'
 
-- script: 
+- script: |
     wget "https://download-installer.cdn.mozilla.net/pub/firefox/nightly/latest-mozilla-central-l10n/firefox-68.0a1.en-GB.linux-x86_64.tar.bz2"
     tar -xf firefox-68.0a1.en-GB.linux-x86_64.tar.bz2
     ln -s `pwd`/firefox/firefox-bin /bin/firefox-nightly
     chmod +x /bin/firefox-nightly
   displayName: 'install firefox nightly'
 
-- script:
+- script: |
     npm install -g tap-xunit
     npm install
     npm run build
@@ -30,3 +30,4 @@ steps:
 
 - script: 
     npm run test | tap-xunit
+  displayName: 'Test'
