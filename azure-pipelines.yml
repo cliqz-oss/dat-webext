@@ -18,8 +18,7 @@ steps:
 - script: |
     wget "https://download-installer.cdn.mozilla.net/pub/firefox/nightly/latest-mozilla-central-l10n/firefox-68.0a1.en-GB.linux-x86_64.tar.bz2"
     tar -xf firefox-68.0a1.en-GB.linux-x86_64.tar.bz2
-    ln -s `pwd`/firefox/firefox-bin /bin/firefox-nightly
-    chmod +x /bin/firefox-nightly
+    chmod +x ./firefox/firefox-bin
   displayName: 'install firefox nightly'
 
 - script: |
@@ -29,5 +28,5 @@ steps:
   displayName: 'npm install and build'
 
 - script: 
-    npm run test | tap-xunit
+    MOZ_BINARY=./firefox/firefox-bin npm run test | tap-xunit
   displayName: 'Test'
