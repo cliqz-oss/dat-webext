@@ -23,5 +23,5 @@ steps:
   displayName: 'npm install and build'
 
 - script: 
-    MOZ_BINARY=./firefox/firefox-bin npm run test | tap-xunit
+    MOZ_BINARY=./firefox/firefox-bin npm run test | tap-xunit > ./test-results.xml
   displayName: 'Test'
