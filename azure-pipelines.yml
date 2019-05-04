@@ -1,0 +1,27 @@
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: NodeTool@0
+  inputs:
+    versionSpec: '10.x'
+  displayName: 'Install Node.js'
+
+- script: |
+    wget "https://download-installer.cdn.mozilla.net/pub/firefox/nightly/latest-mozilla-central-l10n/firefox-68.0a1.en-GB.linux-x86_64.tar.bz2"
+    tar -xf firefox-68.0a1.en-GB.linux-x86_64.tar.bz2
+    chmod +x ./firefox/firefox-bin
+  displayName: 'Install Firefox'
+
+- script: |
+    npm install -g tap-xunit
+    npm install
+    npm run build
+  displayName: 'npm install and build'
+
+- script: 
+    MOZ_BINARY=./firefox/firefox-bin npm run test | tap-xunit
+  displayName: 'Test'
