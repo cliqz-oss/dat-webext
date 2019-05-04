@@ -16,11 +16,12 @@
         "storage",
         "unlimitedStorage",
         "tabs",
-        "<all_urls>"
+        "<all_urls>",
+        "dns"
     ],
     "experiment_apis": {
         "protocol": {
-            "schema": "libdweb/protocol/protocol.json",
+            "schema": "libdweb/toolkit/components/extensions/schemas/protocol.json",
             "child": {
                 "scopes": [
                     "addon_child"
@@ -30,7 +31,7 @@
                         "protocol"
                     ]
                 ],
-                "script": "libdweb/protocol/client.js"
+                "script": "libdweb/toolkit/components/extensions/child/ext-protocol.js"
             },
             "parent": {
                 "events": [
@@ -44,7 +45,7 @@
                         "protocol"
                     ]
                 ],
-                "script": "libdweb/protocol/host.js"
+                "script": "libdweb/toolkit/components/extensions/parent/ext-protocol.js"
             }
         },
         "processScript": {
@@ -62,7 +63,7 @@
             }
         },
         "TCPSocket": {
-            "schema": "libdweb/TCPSocket/TCPSocket.json",
+            "schema": "libdweb/toolkit/components/extensions/schemas/tcp.json",
             "child": {
                 "scopes": [
                     "addon_child"
@@ -72,11 +73,11 @@
                         "TCPSocket"
                     ]
                 ],
-                "script": "libdweb/TCPSocket/Socket.js"
+                "script": "libdweb/toolkit/components/extensions/child/ext-tcp.js"
             }
         },
         "UDPSocket": {
-            "schema": "libdweb/UDPSocket/UDPSocket.json",
+            "schema": "libdweb/toolkit/components/extensions/schemas/udp.json",
             "child": {
                 "scopes": [
                     "addon_child"
@@ -86,21 +87,7 @@
                         "UDPSocket"
                     ]
                 ],
-                "script": "libdweb/UDPSocket/Socket.js"
-            }
-        },
-        "DNS": {
-            "schema": "libdweb/dns/dns.json",
-            "parent": {
-                "scopes": [
-                    "addon_parent"
-                ],
-                "paths": [
-                    [
-                        "DNS"
-                    ]
-                ],
-                "script": "libdweb/dns/dns.js"
+                "script": "libdweb/toolkit/components/extensions/child/ext-udp.js"
             }
         }
     },

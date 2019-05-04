@@ -7,29 +7,30 @@
     },
     "permissions": [
         "storage",
-        "unlimitedStorage"
+        "unlimitedStorage",
+        "dns"
     ],
     "experiment_apis": {
         "test": {
-            "schema": "../addon/libdweb/test/test.json",
+            "schema": "../addon/libdweb/toolkit/components/extensions/schemas/test.json",
             "child": {
               "scopes": ["addon_child"],
               "paths": [["test"]],
-              "script": "../addon/libdweb/test/test.js"
+              "script": "../addon/libdweb/toolkit/components/extensions/child/ext-test.js"
             }
         },
         "protocol": {
-            "schema": "../addon/libdweb/protocol/protocol.json",
+            "schema": "../addon/libdweb/toolkit/components/extensions/schemas/protocol.json",
             "child": {
                 "scopes": ["addon_child"],
                 "paths": [["protocol"]],
-                "script": "../addon/libdweb/protocol/client.js"
+                "script": "../addon/libdweb/toolkit/components/extensions/child/ext-protocol.js"
             },
             "parent": {
                 "events": ["startup"],
                 "scopes": ["addon_parent"],
                 "paths": [["protocol"]],
-                "script": "../addon/libdweb/protocol/host.js"
+                "script": "../addon/libdweb/toolkit/components/extensions/parent/ext-protocol.js"
             }
         },
         "processScript": {
@@ -41,27 +42,19 @@
             }
         },
         "TCPSocket": {
-            "schema": "../addon/libdweb/TCPSocket/TCPSocket.json",
+            "schema": "../addon/libdweb/toolkit/components/extensions/schemas/tcp.json",
             "child": {
                 "scopes": ["addon_child"],
                 "paths": [["TCPSocket"]],
-                "script": "../addon/libdweb/TCPSocket/Socket.js"
+                "script": "../addon/libdweb/toolkit/components/extensions/child/ext-tcp.js"
             }
         },
         "UDPSocket": {
-            "schema": "../addon/libdweb/UDPSocket/UDPSocket.json",
+            "schema": "../addon/libdweb/toolkit/components/extensions/schemas/udp.json",
             "child": {
               "scopes": ["addon_child"],
               "paths": [["UDPSocket"]],
-              "script": "../addon/libdweb/UDPSocket/Socket.js"
-            }
-        },
-        "DNS": {
-            "schema": "../addon/libdweb/dns/dns.json",
-            "parent": {
-              "scopes": ["addon_parent"],
-              "paths": [["DNS"]],
-              "script": "../addon/libdweb/dns/dns.js"
+              "script": "../addon/libdweb/toolkit/components/extensions/child/ext-udp.js"
             }
         }
     }

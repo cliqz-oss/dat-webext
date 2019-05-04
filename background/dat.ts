@@ -1,3 +1,4 @@
+import { EventEmitter } from "events";
 
 export interface CreateOptions {
   title?: string
@@ -27,6 +28,7 @@ export interface Hyperdrive {
   content: Hypercore
   metadata: Hypercore
   checkout(version: number): Hyperdrive
+  createReadStream(path, opts?): EventEmitter
 }
 
 export interface DatArchive {

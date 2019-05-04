@@ -6,9 +6,7 @@ const { test } = browser.test;
 
 // we have to register the protocol so the URL implementation
 // recognises dat:// as a protocol.
-browser.protocol.registerProtocol('dat', (request) => ({
-  content: () => {}
-}));
+browser.protocol.registerProtocol('dat', (request) => new Response("Just a plain text"));
 
 async function setupLibrary() {
   const library = new DatLibrary();

@@ -24,10 +24,6 @@ declare namespace browser.protocol {
   type Request = {
     url: string
   }
-  type Response = {
-    contentType?: string
-    content: AsyncIterableIterator<ArrayBuffer>
-  }
   function registerProtocol(name: string, handler: (request: Request) => Response): void
 }
 
