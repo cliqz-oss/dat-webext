@@ -77,21 +77,11 @@ export default class DatLibrary implements DatStorage {
   }
 
   _createNode() {
-    if (window.navigator.platform.startsWith('Win')) {
-      this.node = createNode({
-        storage: this,
-        dns: this.dns,
-        autoListen: true,
-      });
-    } else {
-      console.warn('Falling back to discovery-swarm-stream');
-      this.node = createNode({
-        storage: this,
-        dns: this.dns,
-        autoListen: false,
-        dss: 'wss://discovery.dat-web.eu',
-      });
-    }
+    this.node = createNode({
+      storage: this,
+      dns: this.dns,
+      autoListen: true,
+    });
     this.node.on('error', (err) => {
       console.warn('node error', err);
       setTimeout(() => this._createNode(), 5000);
