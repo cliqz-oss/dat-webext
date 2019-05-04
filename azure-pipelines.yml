@@ -1,3 +1,7 @@
+variables:
+  firefox_base_url: "https://download-installer.cdn.mozilla.net/pub/firefox/nightly/latest-mozilla-central-l10n/"
+  firefox_distribution: "firefox-68.0a1.en-GB.linux-x86_64.tar.bz2"
+
 trigger:
 - master
 
@@ -11,14 +15,14 @@ steps:
   displayName: 'Install Node.js'
 
 - script: |
-    wget "https://download-installer.cdn.mozilla.net/pub/firefox/nightly/latest-mozilla-central-l10n/firefox-68.0a1.en-GB.linux-x86_64.tar.bz2"
-    tar -xf firefox-68.0a1.en-GB.linux-x86_64.tar.bz2
+    wget "$(firefox_base_url)$(firefox_distribution)"
+    tar -xf $(firefox_distribution)
     chmod +x ./firefox/firefox-bin
   displayName: 'Install Firefox'
 
 - script: |
     npm install -g tap-xunit
-    npm install
+    npm ci
     npm run build
   displayName: 'npm install and build'
 
