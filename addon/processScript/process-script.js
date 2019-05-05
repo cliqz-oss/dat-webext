@@ -101,7 +101,6 @@ const DocumentManager = {
   },
 
   onMessage({ data }) {
-    console.log('[process-script] message', JSON.stringify(data));
     if (data.source === 'dat-api') {
       sendToBackground(data);
     }
