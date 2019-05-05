@@ -7,6 +7,10 @@ interface CloseableEventTarget extends EventTarget {
   close(): void
 }
 
+interface ApiOptions {
+  disablePrompts?: boolean
+}
+
 class DatApi {
 
   listenerStreams: Map<number, {
@@ -23,8 +27,10 @@ class DatApi {
     forkAndLoad(url: string, opts: CreateOptions): Promise<void>
   }
   api: any
+  disablePrompts: boolean
 
-  constructor(library: DatLibrary) {
+  constructor(library: DatLibrary, opts: ApiOptions = {}) {
+    const disablePrompts = !!opts.disablePrompts;
     const getArchiveFromUrl = library.getArchiveFromUrl.bind(library);
     this.listenerStreams = new Map();
     const listenerStreams = this.listenerStreams
@@ -34,7 +40,7 @@ class DatApi {
     });
     const events = apiWrapper.createProxy();
 
-    this.privateApi = {
+    const privateApi = this.privateApi = {
       async create(opts: CreateOptions) {
         const archive = await library.node.createArchive(opts);
         library._addLibraryEntry(archive);
@@ -80,6 +86,9 @@ class DatApi {
         return library.node.dns.resolve(name);
       },
       async create(opts: CreateOptions = {}) {
+        if (disablePrompts) {
+          return privateApi.create(opts);
+        }
         return await dialog.open({
           action: 'create',
           opts: {
@@ -89,6 +98,9 @@ class DatApi {
         });
       },
       async fork(url: string, opts: CreateOptions = {}) {
+        if (disablePrompts) {
+          return privateApi.fork(url, opts);
+        }
         return await dialog.open({
           action: 'fork',
           opts: {
