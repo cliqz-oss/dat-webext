@@ -1,5 +1,5 @@
 /* globals ChromeUtils, ExtensionAPI */
-ChromeUtils.import('resource://gre/modules/Services.jsm');
+Components.utils.import('resource://gre/modules/Services.jsm');
 
 const processScriptUrl = new URL(`./process-script.js?now=${Date.now()}`, Components.stack.filename)
 
