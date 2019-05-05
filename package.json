@@ -31,10 +31,10 @@
     "web-ext": "^3.0.0"
   },
   "devDependencies": {
+    "@sammacbeth/tape-ext": "0.5.1",
     "@sammacbeth/webextify": "16.2.7",
     "cross-env": "^5.2.0",
     "browserify": "^16.2.3",
-    "tape-ext": "^0.5.1",
     "tsify": "^4.0.1",
     "typescript": "^3.2.2",
     "web-ext-types": "^3.1.0"
