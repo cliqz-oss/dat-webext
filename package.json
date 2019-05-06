@@ -3,7 +3,7 @@
   "version": "0.0.5",
   "description": "",
   "scripts": {
-    "build:test": "webextify -r fs:graceful-fs -e test/test.ts -p tsify > test/test-bundle.js",
+    "build:test": "webextify -r fs:graceful-fs -e test/test.ts -p tsify > test/test-bundle.js && browserify -e ./web-api/web-api.js > test/web-api.js",
     "test": "npm run build:test && tape-ext ./test/manifest.json",
     "build": "npm run build:background && npm run build:webapi",
     "build:background": "webextify -r fs:graceful-fs -e background/index.ts -p tsify > addon/background.js",
@@ -16,7 +16,7 @@
   "license": "MIT",
   "dependencies": {
     "@sammacbeth/dat-node": "1.0.3",
-    "@sammacbeth/libdweb": "0.0.4",
+    "@sammacbeth/libdweb": "0.0.5",
     "@sammacbeth/random-access-idb-mutable-file": "^0.1.1",
     "base64-js": "^1.3.0",
     "bulma": "^0.7.2",
@@ -31,10 +31,10 @@
     "web-ext": "^3.0.0"
   },
   "devDependencies": {
+    "@sammacbeth/tape-ext": "0.5.1",
     "@sammacbeth/webextify": "16.2.7",
     "cross-env": "^5.2.0",
     "browserify": "^16.2.3",
-    "tape-ext": "^0.5.1",
     "tsify": "^4.0.1",
     "typescript": "^3.2.2",
     "web-ext-types": "^3.1.0"

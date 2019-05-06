@@ -2,6 +2,11 @@
     "manifest_version": 2,
     "name": "Dat Protocol Test",
     "version": "0.0.1",
+    "applications": {
+        "gecko": {
+            "id": "dat@cliqz.com"
+        }
+    },
     "background": {
         "scripts": ["test-bundle.js"]
     },

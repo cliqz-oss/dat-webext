@@ -7,6 +7,7 @@ declare namespace browser.processScript {
 declare namespace browser.test {
   interface Assert {
     fail(message?: string): void
+    pass(message?: string): void
     ok(v: boolean, message?: string): void
     equal(actual: any, expected: any, message?: string): void
     notEqual(actual: any, expected: any, message?: string): void

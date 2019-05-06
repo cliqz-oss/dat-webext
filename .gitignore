@@ -6,3 +6,4 @@ addon/background.js
 addon/web-api.js
 web-ext-artifacts
 test/test-bundle.js
+test/web-api.js

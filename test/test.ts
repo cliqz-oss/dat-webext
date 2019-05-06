@@ -1,22 +1,52 @@
 import * as parseUrl from 'parse-dat-url';
 import DatLibrary from '../background/library';
 import DatHandler from '../background/protocol';
+import DatApi from '../background/api';
 
 const { test } = browser.test;
 
 // we have to register the protocol so the URL implementation
 // recognises dat:// as a protocol.
-browser.protocol.registerProtocol('dat', (request) => new Response("Just a plain text"));
 
-async function setupLibrary() {
-  const library = new DatLibrary();
-  await library.init();
-  return library;
-}
+const library = new DatLibrary();
+const protocolHandler = new DatHandler(library.getArchiveFromUrl.bind(library));
+const api = new DatApi(library, { disablePrompts: true });
+const ready = library.init();
+browser.protocol.registerProtocol('dat', (request) => {
+  return protocolHandler.handleRequest(request);
+});
+browser.processScript.setAPIScript(browser.runtime.getURL('web-api.js'));
+
+let pendingEvents = [];
+const datArchiveTestListener = new Promise((resolve) => {
+  browser.runtime.onMessage.addListener((message) => {
+    if (message.action === 'test') {
+      if (message.event[0] === 'end') {
+        resolve();
+      }
+      pendingEvents.push(message.event);
+    }
+  });
+});
+
+test('DatArchive API', async (assert) => {
+  await ready;
+  const parseTestEvent = ([status, e]) => {
+    if (status === 'fail') {
+      assert.fail(e.fullTitle);
+    } else if (status === 'pass') {
+      assert.pass(e.fullTitle);
+    };
+  };
+  pendingEvents.forEach(parseTestEvent);
+  pendingEvents = [];
+  await datArchiveTestListener;
+  pendingEvents.forEach(parseTestEvent);
+});
 
 test('Dat Network', async (assert) => {
   console.log('start test');
-  const library = await setupLibrary();
+  await ready;
   console.log(library);
   const archive = await library.getArchive('datproject.org');
   console.log(archive);
@@ -25,12 +55,11 @@ test('Dat Network', async (assert) => {
 });
 
 test('Protocol handler', async (assert) => {
-  const library = await setupLibrary();
-  const handler = new DatHandler(library.getArchiveFromUrl.bind(library));
+  await ready;
 
   const resolveUrl = async (url: string) => {
     const { pathname, version } = parseUrl(url);
-    const { path } = await handler.resolvePath('dat://sammacbeth.eu+26/', pathname, parseInt(version));
+    const { path } = await protocolHandler.resolvePath('dat://sammacbeth.eu+26/', pathname, parseInt(version));
     return path;
   }
 

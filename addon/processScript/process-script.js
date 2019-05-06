@@ -1,5 +1,5 @@
-ChromeUtils.import("resource://gre/modules/ExtensionUtils.jsm");
 Components.utils.import('resource://gre/modules/Services.jsm');
+Components.utils.import("resource://gre/modules/ExtensionUtils.jsm");
 
 let WEB_API_URL = '';
 const extensionId = 'dat@cliqz.com';
