@@ -5,6 +5,18 @@ import DatApi from '../background/api';
 
 const { test } = browser.test;
 
+const testWithTimeout = (name: string, testFn: (assert: browser.test.Assert) => Promise<void>, timeout: number) => {
+  return test(name, async (assert) => {
+    const timedout = new Promise((_, rej) => setTimeout(() => rej(`Timed out after ${timeout}ms`), timeout));
+    const runningTest = testFn(assert);
+    try {
+      await Promise.race([runningTest, timedout]);
+    } catch (e) {
+      assert.fail(`${name} failed to complete: ${e.toString()}`);
+    }
+  });
+};
+
 // we have to register the protocol so the URL implementation
 // recognises dat:// as a protocol.
 
@@ -29,7 +41,7 @@ const datArchiveTestListener = new Promise((resolve) => {
   });
 });
 
-test('DatArchive API', async (assert) => {
+testWithTimeout('DatArchive API', async (assert) => {
   await ready;
   const parseTestEvent = ([status, e]) => {
     if (status === 'fail') {
@@ -42,19 +54,16 @@ test('DatArchive API', async (assert) => {
   pendingEvents = [];
   await datArchiveTestListener;
   pendingEvents.forEach(parseTestEvent);
-});
+}, 60000);
 
-test('Dat Network', async (assert) => {
-  console.log('start test');
+testWithTimeout('Dat Network', async (assert) => {
   await ready;
-  console.log(library);
   const archive = await library.getArchive('datproject.org');
-  console.log(archive);
   assert.ok(!(await archive.getInfo()).isOwner);
   assert.ok((await archive.readdir('/')).includes('index.html'));
-});
+}, 30000);
 
-test('Protocol handler', async (assert) => {
+testWithTimeout('Protocol handler', async (assert) => {
   await ready;
 
   const resolveUrl = async (url: string) => {
@@ -73,4 +82,4 @@ test('Protocol handler', async (assert) => {
   } catch (e) {
     assert.equal(e.message, 'NOT_FOUND');
   }
-});
+}, 60000);
