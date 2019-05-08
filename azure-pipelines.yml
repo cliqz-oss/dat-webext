@@ -30,10 +30,10 @@ jobs:
         firefox_base_url: "https://download-installer.cdn.mozilla.net/pub/firefox/nightly/latest-mozilla-central-l10n/"
         firefox_distribution: "firefox-68.0a1.en-GB.linux-x86_64.tar.bz2"
       stable:
-        firefox_base_url: "https://ftp.mozilla.org/pub/firefox/releases/66.0.5/linux-x86_64/en-GB/"
-        firefox_distribution: "firefox-66.0.5.tar.bz2"
+        firefox_base_url: "https://ftp.mozilla.org/pub/devedition/releases/66.0b14/linux-x86_64/en-GB/"
+        firefox_distribution: "firefox-66.0b14.tar.bz2"
       beta:
-        firefox_base_url: "https://ftp.mozilla.org/pub/firefox/releases/67.0b18/linux-x86_64/en-GB/"
+        firefox_base_url: "https://ftp.mozilla.org/pub/devedition/releases/67.0b18/linux-x86_64/en-GB/"
         firefox_distribution: "firefox-67.0b18.tar.bz2" 
   steps:
   - task: NodeTool@0
