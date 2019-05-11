@@ -10,7 +10,8 @@
     "build:webapi": "browserify -e ./web-api/web-api.js > addon/web-api.js",
     "start": "cross-env MOZ_DISABLE_CONTENT_SANDBOX=1 web-ext run -s addon --firefox=firefoxdeveloperedition --no-reload -u about:debugging",
     "postinstall": "./copy-assets.sh",
-    "package": "web-ext build -s ./addon/"
+    "package": "web-ext build -s ./addon/",
+    "version": "node update_version.js && git add addon/manifest.json"
   },
   "author": "Sam Macbeth",
   "license": "MIT",
