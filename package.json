@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@sammacbeth/tape-ext": "0.5.1",
-    "@sammacbeth/webextify": "16.2.7",
+    "@sammacbeth/webextify": "16.2.8",
     "cross-env": "^5.2.0",
     "browserify": "^16.2.3",
     "tsify": "^4.0.1",
