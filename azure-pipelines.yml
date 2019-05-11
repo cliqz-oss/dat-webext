@@ -1,37 +1,58 @@
-variables:
-  firefox_base_url: "https://download-installer.cdn.mozilla.net/pub/firefox/nightly/latest-mozilla-central-l10n/"
-  firefox_distribution: "firefox-68.0a1.en-GB.linux-x86_64.tar.bz2"
 
 trigger:
 - master
 
-pool:
-  vmImage: 'ubuntu-latest'
+jobs:
+- job: Build
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '10.x'
+    displayName: 'Install Node.js'
+  - script: |
+      npm ci
+      npm run build
+      npm run package
+    displayName: 'npm install and build'
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: 'web-ext-artifacts/'
+      artifactName: extension
 
-steps:
-- task: NodeTool@0
-  inputs:
-    versionSpec: '10.x'
-  displayName: 'Install Node.js'
-
-- script: |
-    wget "$(firefox_base_url)$(firefox_distribution)"
-    tar -xf $(firefox_distribution)
-    chmod +x ./firefox/firefox-bin
-  displayName: 'Install Firefox'
-
-- script: |
-    npm install -g tap-xunit
-    npm ci
-    npm run build
-  displayName: 'npm install and build'
-
-- script: 
-    MOZ_BINARY=./firefox/firefox-bin npm run test | tap-xunit > ./test-results.xml
-  displayName: 'Test'
-
-- task: PublishTestResults@2
-  condition: succeededOrFailed()
-  inputs:
-    testRunner: JUnit
-    testResultsFiles: './test-results.xml'
+- job: Test
+  pool:
+    vmImage: 'ubuntu-latest'
+  strategy:
+    matrix:
+      nightly:
+        firefox_base_url: "https://download-installer.cdn.mozilla.net/pub/firefox/nightly/latest-mozilla-central-l10n/"
+        firefox_distribution: "firefox-68.0a1.en-GB.linux-x86_64.tar.bz2"
+      stable:
+        firefox_base_url: "https://ftp.mozilla.org/pub/devedition/releases/66.0b14/linux-x86_64/en-GB/"
+        firefox_distribution: "firefox-66.0b14.tar.bz2"
+      beta:
+        firefox_base_url: "https://ftp.mozilla.org/pub/devedition/releases/67.0b18/linux-x86_64/en-GB/"
+        firefox_distribution: "firefox-67.0b18.tar.bz2" 
+  steps:
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '10.x'
+    displayName: 'Install Node.js'
+  - script: |
+      wget "$(firefox_base_url)$(firefox_distribution)"
+      tar -xf $(firefox_distribution)
+      chmod +x ./firefox/firefox-bin
+      npm install -g tap-xunit
+      npm ci
+    displayName: 'Setup testing environment'
+  - script: 
+      MOZ_BINARY=./firefox/firefox-bin npm run test | tap-xunit > ./test-results.xml
+    displayName: 'Test'
+  - task: PublishTestResults@2
+    condition: succeededOrFailed()
+    inputs:
+      testRunner: JUnit
+      testResultsFiles: './test-results.xml'
+      testRunTitle: $(Agent.JobName)
