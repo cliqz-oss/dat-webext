@@ -2,8 +2,8 @@
 
 This is a Webextension which enables websites to be loaded over the `dat://` protocol on Firefox. 
 It uses the [libdweb](https://github.com/mozilla/libdweb) protocol handler to register the `dat://` protocol, 
-and [dat-archive-web](https://github.com/RangerMauve/dat-archive-web) to replicate with the Dat network 
-via a [dat-gateway](https://github.com/RangerMauve/dat-gateway) instance.
+and polyfills for node's `net` and `dgram` APIs using libdweb's TCPSocket and UDPSocket in order
+to bundle the dat network implementation with the extension. More on how this works in this [post](https://sammacbeth.eu/blog/2019/05/12/dat-for-firefox-2.html)
 
 ## Try it out
 
@@ -13,7 +13,7 @@ npm install
 npm run build
 ```
 
-Run with [web-ext](https://github.com/mozilla/web-ext) (requires [Firefox Developer Edition](https://www.mozilla.org/en-US/firefox/developer/) installed):
+Run with [web-ext](https://github.com/mozilla/web-ext) (requires [Firefox Developer Edition](https://www.mozilla.org/en-US/firefox/developer/) or [Firefox Nightly](https://www.mozilla.org/en-US/firefox/channel/desktop/#nightly) installed):
 ```
 npm run start
 ```
