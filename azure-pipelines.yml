@@ -26,15 +26,18 @@ jobs:
     vmImage: 'ubuntu-latest'
   strategy:
     matrix:
-      nightly:
-        firefox_base_url: "https://download-installer.cdn.mozilla.net/pub/firefox/nightly/latest-mozilla-central-l10n/"
-        firefox_distribution: "firefox-68.0a1.en-GB.linux-x86_64.tar.bz2"
-      stable:
+      ff_nightly:
+        firefox_base_url: "https://ftp.mozilla.org/pub/firefox/nightly/latest-mozilla-central/"
+        firefox_distribution: "firefox-68.0a1.en-US.linux-x86_64.tar.bz2"
+      ff_66:
         firefox_base_url: "https://ftp.mozilla.org/pub/devedition/releases/66.0b14/linux-x86_64/en-GB/"
         firefox_distribution: "firefox-66.0b14.tar.bz2"
-      beta:
-        firefox_base_url: "https://ftp.mozilla.org/pub/devedition/releases/67.0b18/linux-x86_64/en-GB/"
-        firefox_distribution: "firefox-67.0b18.tar.bz2" 
+      ff_67:
+        firefox_base_url: "https://ftp.mozilla.org/pub/devedition/releases/67.0b19/linux-x86_64/en-GB/"
+        firefox_distribution: "firefox-67.0b19.tar.bz2"
+      ff_68:
+        firefox_base_url: "https://ftp.mozilla.org/pub/devedition/releases/68.0b1//linux-x86_64/en-GB/"
+        firefox_distribution: "firefox-68.0b1/.tar.bz2"
   steps:
   - task: NodeTool@0
     inputs:
