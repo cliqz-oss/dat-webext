@@ -120,10 +120,8 @@ class DatHandler {
         } catch (e) {
           if (e instanceof DNSLookupFailed) {
             controller.enqueue(`Dat DNS Lookup failed for ${e.message}`);
-            return;
           } else if (e.message === ERROR.ARCHIVE_LOAD_TIMEOUT) {
             controller.enqueue('Unable locate the Dat archive on the network.');
-            return;
           } else if (e.message === ERROR.NOT_FOUND) {
             controller.enqueue(`Not found: ${e.toString()}`);
           } else if (e.message === ERROR.DIRECTORY) {
