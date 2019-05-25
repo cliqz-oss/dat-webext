@@ -47,6 +47,7 @@ interface DatInfo {
 interface DatNode extends EventEmitter {
   storage: DatStorage
   dns: DatDNS
+  swarm: EventEmitter
   _dats: {
     [key: string]: DatInfo
   }
@@ -86,6 +87,9 @@ export default class DatLibrary implements DatStorage {
       console.warn('node error', err);
       setTimeout(() => this._createNode(), 5000);
       this.node.close();
+    });
+    ['peer', 'connecting', 'connect-failed', 'handshaking', 'handshake-timeout', 'connection', 'connection-closed'].forEach((event) => {
+      this.node.swarm.on(event, (v) => console.log(`[${event}]`, v));
     });
   }
 

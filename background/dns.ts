@@ -84,6 +84,7 @@ export default async function resolve(url: string): Promise<string> {
   // check via Dat-DNS
   try {
     const addr = await datDns.resolveName(host);
+    console.log(`[dns] Resolved ${host} to ${addr} (datdns)`);
     return addr;
   } catch (e) {
   }
@@ -100,12 +101,14 @@ export default async function resolve(url: string): Promise<string> {
       addr = addr.substring(6);
       const iTtl = ttl.startsWith('TTL=') || ttl.startsWith('ttl=') ? parseInt(ttl.substring(4)) : 3600;
       lookupCache.set({ host, address: addr, expires: Date.now() + (iTtl * 1000) });
+      console.log(`[dns] Resolved ${host} to ${addr} (dnsserver)`);
       return addr;
     } else {
       throw new DNSLookupFailed(host);
     }
   } catch (e) {
     if (cached) {
+      console.log(`[dns] Using expired dns entry from cache: ${host} to ${cached.address}`);
       // use outdated cache entry
       return cached.address;
     }
