@@ -58,7 +58,7 @@ testWithTimeout('DatArchive API', async (assert) => {
 
 testWithTimeout('Dat Network', async (assert) => {
   await ready;
-  const archive = await library.getArchive('datproject.org');
+  const archive = await library.getArchive('sammacbeth.eu');
   assert.ok(!(await archive.getInfo()).isOwner);
   assert.ok((await archive.readdir('/')).includes('index.html'));
 }, 30000);
@@ -68,16 +68,16 @@ testWithTimeout('Protocol handler', async (assert) => {
 
   const resolveUrl = async (url: string) => {
     const { pathname, version } = parseUrl(url);
-    const { path } = await protocolHandler.resolvePath('dat://sammacbeth.eu+26/', pathname, parseInt(version));
+    const { path } = await protocolHandler.resolvePath(url, pathname, parseInt(version));
     return path;
   }
 
-  let testDatAddress = '70fa7fd2670f48226fa3877e4d0b23d1a9124b086efe8831c5f8d6450aadc47c'
-  assert.equal(await resolveUrl(`dat://${testDatAddress}+28/`), '/index.html');
-  assert.equal(await resolveUrl(`dat://${testDatAddress}+28/posts`), '/posts/index.html');
-  assert.equal(await resolveUrl(`dat://${testDatAddress}+27/posts`), '/posts.html');
+  let testDatAddress = '41f8a987cfeba80a037e51cc8357d513b62514de36f2f9b3d3eeec7a8fb3b5a5'
+  assert.equal(await resolveUrl(`dat://${testDatAddress}+33/`), '/index.html');
+  assert.equal(await resolveUrl(`dat://${testDatAddress}+33/posts`), '/posts/index.html');
+  assert.equal(await resolveUrl(`dat://${testDatAddress}+32/posts`), '/posts.html');
   try {
-    await resolveUrl(`dat://${testDatAddress}+28/posts.html`)
+    await resolveUrl(`dat://${testDatAddress}+33/posts.html`)
     assert.fail('Expected NOT_FOUND error');
   } catch (e) {
     assert.equal(e.message, 'NOT_FOUND');
