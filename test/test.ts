@@ -83,3 +83,10 @@ testWithTimeout('Protocol handler', async (assert) => {
     assert.equal(e.message, 'NOT_FOUND');
   }
 }, 60000);
+
+
+test('Dat DNS', async (assert) => {
+  await ready;
+  const addr = await library.dns.resolve('dat://sammacbeth.eu');
+  assert.equal(addr, '41f8a987cfeba80a037e51cc8357d513b62514de36f2f9b3d3eeec7a8fb3b5a5');
+})
