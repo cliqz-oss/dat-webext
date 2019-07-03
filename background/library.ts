@@ -8,7 +8,7 @@ import Network from './network';
 EventEmitter.defaultMaxListeners = 100;
 
 const ARCHIVE_LIST_KEY = 'archives';
-const DEFAULT_SEED_TIME = 1e3 * 60 * 10; // 10 mins
+const DEFAULT_SEED_TIME = 1e3 * 60 * 10; // 5 mins
 
 export interface ArchiveMetadata extends browser.storage.StorageObject {
   isOwner: boolean
@@ -54,9 +54,6 @@ export default class DatLibrary implements DatStorage {
 
   _createNode() {
     this.node = new Network();
-    ['peer', 'connecting', 'connect-failed', 'handshaking', 'handshake-timeout', 'connection', 'connection-closed', 'error'].forEach((event) => {
-      this.node.swarm.on(event, (v) => console.log(`[${event}]`, v));
-    });
   }
 
   async getStorage(key: string): Promise<any> {

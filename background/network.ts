@@ -8,10 +8,13 @@ import { CreateOptions, DatArchive } from './dat';
 
 export default class Network {
 
+  SWARM_RESTART_AFTER = 1000 * 60 * 20;
+
   private drives: Map<string, Hyperdrive> = new Map();
   private swarmingFeeds = new Set<string>();
-  private _swarm: Discovery
-  private connections: { [key: string]: number } = {}
+  private _swarm: Discovery;
+  private connections: { [key: string]: number } = {};
+  private swarmCreatedAt: number;
 
   constructor() {
     setInterval(() => {
@@ -26,10 +29,21 @@ export default class Network {
           this.swarm.add(drive);
         }
       });
-      // shutdown the swarm if it is not being used
       if (this.swarmingFeeds.size === 0 && this._swarm) {
+        // shutdown the swarm if it is not being used
         this._swarm.close();
         this._swarm = null;
+        this.connections = {};
+      } else if (this.SWARM_RESTART_AFTER !== 0 && this._swarm && Date.now() - this.swarmCreatedAt > this.SWARM_RESTART_AFTER) {
+        // recreate the swarm after a specified interval
+        console.log('[restart] Restarting swarm, age = ', Date.now() - this.swarmCreatedAt);
+        this._swarm.close();
+        this._swarm = null;
+        this.connections = {};
+        this.swarmingFeeds.forEach((feed) => {
+          const drive = this.drives.get(feed);
+          this.swarm.add(drive);
+        });
       }
     }, 60000);
   }
@@ -49,6 +63,10 @@ export default class Network {
         if (this.connections[keyStr]) {
           this.connections[keyStr] -= 1;
         }
+      });
+      this.swarmCreatedAt = Date.now();
+      ['peer', 'connecting', 'connect-failed', 'handshaking', 'handshake-timeout', 'connection', 'connection-closed', 'error'].forEach((event) => {
+        this._swarm.on(event, (v) => console.log(`[${event}]`, v));
       });
     }
     return this._swarm;
