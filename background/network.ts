@@ -1,7 +1,7 @@
 import * as Discovery from 'hyperdiscovery';
 import * as Hyperdrive from 'hyperdrive';
 import * as DatArchiveImpl from '@sammacbeth/dat-node/lib/dat-archive'
-import * as RandomAccess from '@sammacbeth/random-access-idb-mutable-file';
+import * as RandomAccess from 'random-access-idb-mutable-file';
 import { keyPair } from 'hypercore-crypto';
 import * as pda from 'pauls-dat-api';
 import { CreateOptions, DatArchive } from './dat';

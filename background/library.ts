@@ -1,5 +1,4 @@
 import { EventEmitter } from 'events';
-import * as RandomAccess from '@sammacbeth/random-access-idb-mutable-file';
 import { DatArchive } from './dat';
 import resolve from './dns';
 import Network from './network';
@@ -26,15 +25,11 @@ export interface Archives extends browser.storage.StorageObject {
   [key: string]: ArchiveMetadata
 }
 
-interface DatStorage {
-  getStorage(key: string): Promise<any>
-}
-
 interface DatDNS {
   resolve(name: string): Promise<string>
 }
 
-export default class DatLibrary implements DatStorage {
+export default class DatLibrary {
 
   storageLock: Promise<void>
   archives: Archives
@@ -54,13 +49,6 @@ export default class DatLibrary implements DatStorage {
 
   _createNode() {
     this.node = new Network();
-  }
-
-  async getStorage(key: string): Promise<any> {
-    return await RandomAccess.mount({
-      name: key,
-      storeName: 'data',
-    });
   }
 
   async init() {
