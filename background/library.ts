@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import * as RandomAccess from '@sammacbeth/random-access-idb-mutable-file';
-import { DatArchive, Hyperdrive, CreateOptions } from './dat';
+import { DatArchive } from './dat';
 import resolve from './dns';
 import Network from './network';
 
