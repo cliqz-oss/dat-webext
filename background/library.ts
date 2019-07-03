@@ -1,8 +1,8 @@
 import { EventEmitter } from 'events';
 import * as RandomAccess from '@sammacbeth/random-access-idb-mutable-file';
-import { createNode } from '@sammacbeth/dat-node';
 import { DatArchive, Hyperdrive, CreateOptions } from './dat';
 import resolve from './dns';
+import Network from './network';
 
 // suppress listener warnings
 EventEmitter.defaultMaxListeners = 100;
@@ -34,37 +34,12 @@ interface DatDNS {
   resolve(name: string): Promise<string>
 }
 
-interface DatInfo {
-  key: string
-  dataStructureId: string
-  discoveryKey?: string
-  loadPromise: Promise<void>
-  dataStructure: Hyperdrive
-  isSwarming: boolean
-  replicationStreams?: any[]
-}
-
-interface DatNode extends EventEmitter {
-  storage: DatStorage
-  dns: DatDNS
-  swarm: EventEmitter
-  _dats: {
-    [key: string]: DatInfo
-  }
-  listen(port?: number): void
-  close(): Promise<void>
-  getArchive(address: string): Promise<DatArchive>
-  createArchive(opts: CreateOptions): Promise<DatArchive>
-  forkArchive(url: string, opts: CreateOptions): Promise<DatArchive>
-  closeArchive(key: string): void
-}
-
 export default class DatLibrary implements DatStorage {
 
   storageLock: Promise<void>
   archives: Archives
   dats: Map<string, DatArchive>
-  node: DatNode
+  node: Network
   dns: DatDNS
 
   constructor() {
@@ -78,17 +53,8 @@ export default class DatLibrary implements DatStorage {
   }
 
   _createNode() {
-    this.node = createNode({
-      storage: this,
-      dns: this.dns,
-      autoListen: true,
-    });
-    this.node.on('error', (err) => {
-      console.warn('node error', err);
-      setTimeout(() => this._createNode(), 5000);
-      this.node.close();
-    });
-    ['peer', 'connecting', 'connect-failed', 'handshaking', 'handshake-timeout', 'connection', 'connection-closed'].forEach((event) => {
+    this.node = new Network();
+    ['peer', 'connecting', 'connect-failed', 'handshaking', 'handshake-timeout', 'connection', 'connection-closed', 'error'].forEach((event) => {
       this.node.swarm.on(event, (v) => console.log(`[${event}]`, v));
     });
   }
@@ -110,15 +76,14 @@ export default class DatLibrary implements DatStorage {
   }
 
   async getArchiveState(key) {
-    const info = this.node._dats[key];
-    const open = info && info.isSwarming
+    const open = this.node.isSwarming(key);
     const state: ArchiveMetadata = this.archives[key];
     if (!state) {
       return null;
     }
     state.open = !!open;
     if (open) {
-      const drive = info.dataStructure
+      const drive = await this.node.getHyperdrive(key);
       state.content = {
         length: drive.content.length,
         byteLength: drive.content.byteLength,
@@ -129,7 +94,7 @@ export default class DatLibrary implements DatStorage {
         byteLength: drive.metadata.byteLength,
         downloaded: drive.metadata.downloaded(),
       };
-      const archive = await this.node.getArchive(`dat://${key}`);
+      const archive = await this.node.getArchive(key);
       const { title, description, type } = await archive.getInfo({ timeout: 30000 });
       state.title = title;
       state.description = description;
@@ -155,7 +120,7 @@ export default class DatLibrary implements DatStorage {
   }
 
   closeArchive(key) {
-    if (this.node._dats[key]) {
+    if (this.node.isSwarming(key)) {
       this.node.closeArchive(key);
     }
     if (this.dats.has(key)) {
@@ -164,7 +129,7 @@ export default class DatLibrary implements DatStorage {
   }
 
   async deleteArchive(key) {
-    if (this.node._dats[key]) {
+    if (this.node.isSwarming(key)) {
       throw 'Cannot delete an open archive';
     }
     window.indexedDB.deleteDatabase(key);
@@ -223,7 +188,7 @@ export default class DatLibrary implements DatStorage {
       if (this.dats.has(key)) {
         archive = this.dats.get(key);
       } else {
-        archive = await this.node.getArchive(`dat://${key}`);
+        archive = await this.node.getArchive(key);
         this.dats.set(key, archive);
       }
       if (archive._version !== version) {

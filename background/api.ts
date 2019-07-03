@@ -47,7 +47,7 @@ class DatApi {
         return archive.url;
       },
       async fork(url, opts) {
-        const addr = await library.node.dns.resolve(url);
+        const addr = await library.dns.resolve(url);
         const archive = await library.node.forkArchive(addr, opts);
         library._addLibraryEntry(archive);
         return archive.url;
@@ -83,7 +83,7 @@ class DatApi {
 
     this.api = {
       resolveName(name) {
-        return library.node.dns.resolve(name);
+        return library.dns.resolve(name);
       },
       async create(opts: CreateOptions = {}) {
         if (disablePrompts) {
