@@ -2,6 +2,7 @@ import * as Discovery from 'hyperdiscovery';
 import * as Hyperdrive from 'hyperdrive';
 import * as DatArchiveImpl from '@sammacbeth/dat-node/lib/dat-archive'
 import * as RandomAccess from '@sammacbeth/random-access-idb-mutable-file';
+import { keyPair } from 'hypercore-crypto';
 import * as pda from 'pauls-dat-api';
 import { CreateOptions, DatArchive } from './dat';
 
@@ -73,38 +74,7 @@ export default class Network {
       }
       return drive
     }
-    const storage = await this.getStorage(address);
-    const drive = new Hyperdrive(storage, Buffer.from(address, 'hex'), {
-      sparse: true,
-    });
-    this.drives.set(address, drive);
-    // wait for ready
-    await new Promise((resolve, reject) => {
-      drive.ready(err => {
-        if (err) reject(err)
-        else resolve()
-      })
-    });
-
-    this.swarm.add(drive);
-    this.swarmingFeeds.add(address);
-
-    // await initial metadata sync if not the owner
-    if (!drive.writable && !drive.metadata.length) {
-      // wait to receive a first update
-      await new Promise((resolve, reject) => {
-        drive.metadata.update(err => {
-          if (err) reject(err)
-          else resolve()
-        })
-      })
-    }
-    if (!drive.writable) {
-      // always download all metadata
-      drive.metadata.download({start: 0, end: -1})
-    }
-
-    return drive;
+    return this.loadHyperdrive(Buffer.from(address, 'hex'));
   }
 
   async getArchive(address: string): Promise<DatArchive> {
@@ -113,11 +83,41 @@ export default class Network {
   }
 
   async createArchive(opts: CreateOptions): Promise<DatArchive> {
-    return null;
+    const kp = keyPair();
+    const address = kp.publicKey.toString('hex');
+    const drive = await this.loadHyperdrive(kp.publicKey, kp.secretKey);
+    pda.writeManifest(drive, opts);
+    return new DatArchiveImpl({ key: address, dataStructure: drive });
   }
 
-  async forkArchive(url: string, opts: CreateOptions): Promise<DatArchive> {
-    return null;
+  async forkArchive(addr: string, manifest: CreateOptions): Promise<DatArchive> {
+    // load source
+    const srcArchive = await this.getHyperdrive(addr);
+    // get source manifest
+    const srcManifest = await (pda.readManifest(srcArchive).catch(_ => ({})));
+    // override any manifest data
+    const dstManifest = {
+      title: (manifest.title) ? manifest.title : srcManifest.title,
+      description: (manifest.description) ? manifest.description : srcManifest.description,
+      type: (manifest.type) ? manifest.type : srcManifest.type
+    };
+    ['web_root', 'fallback_page', 'links'].forEach(field => {
+      if (srcManifest[field]) {
+        dstManifest[field] = srcManifest[field]
+      }
+    });
+    // create the new archive
+    const kp = keyPair();
+    const address = kp.publicKey.toString('hex');
+    const dstArchive = await this.loadHyperdrive(kp.publicKey, kp.secretKey);
+    pda.writeManifest(dstArchive, dstManifest);
+    await pda.exportArchiveToArchive({
+      srcArchive,
+      dstArchive,
+      skipUndownloadedFiles: true,
+      ignore: ['/.dat', '/.git', '/dat.json'],
+    });
+    return new DatArchiveImpl({ key: address, dataStructure: dstArchive });;
   }
 
   closeArchive(key: string): void {
@@ -135,5 +135,42 @@ export default class Network {
 
   isSwarming(key: string): boolean {
     return this.swarmingFeeds.has(key);
+  }
+
+  private async loadHyperdrive(address: Buffer, secretKey?: Buffer) : Promise<Hyperdrive> {
+    const addressStr = address.toString('hex');
+    const storage = await this.getStorage(addressStr);
+    const drive = new Hyperdrive(storage, address, {
+      secretKey,
+      sparse: true,
+    });
+    this.drives.set(addressStr, drive);
+    // wait for ready
+    await new Promise((resolve, reject) => {
+      drive.ready(err => {
+        if (err) reject(err)
+        else resolve()
+      })
+    });
+
+    this.swarm.add(drive);
+    this.swarmingFeeds.add(addressStr);
+
+    // await initial metadata sync if not the owner
+    if (!drive.writable && !drive.metadata.length) {
+      // wait to receive a first update
+      await new Promise((resolve, reject) => {
+        drive.metadata.update(err => {
+          if (err) reject(err)
+          else resolve()
+        })
+      })
+    }
+    if (!drive.writable) {
+      // always download all metadata
+      drive.metadata.download({start: 0, end: -1})
+    }
+
+    return drive;
   }
 }

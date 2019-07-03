@@ -3,6 +3,7 @@ import { EventEmitter } from "events";
 export interface CreateOptions {
   title?: string
   description?: string
+  type?: string
 }
 
 export interface SelectArchiveOptions {
