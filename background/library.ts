@@ -8,7 +8,7 @@ import Network from './network';
 EventEmitter.defaultMaxListeners = 100;
 
 const ARCHIVE_LIST_KEY = 'archives';
-const DEFAULT_SEED_TIME = 1e3 * 60 * 10; // 5 mins
+const DEFAULT_SEED_TIME = 1e3 * 60 * 10; // 10 mins
 
 export interface ArchiveMetadata extends browser.storage.StorageObject {
   isOwner: boolean
