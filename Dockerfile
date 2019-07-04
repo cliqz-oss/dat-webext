@@ -17,7 +17,7 @@ RUN chown node:node -R /app
 USER node
 COPY package.json /app/
 COPY package-lock.json /app/
-COPY copy-assets.sh /app/
+COPY postinstall.sh /app/
 
 # get balrog submitter script
 RUN wget -O /app/submitter.py https://raw.githubusercontent.com/cliqz-oss/browser-core/master/fern/submitter.py
