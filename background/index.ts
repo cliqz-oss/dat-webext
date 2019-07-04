@@ -6,8 +6,6 @@ browser.processScript.setAPIScript(browser.runtime.getURL('web-api.js'));
 
 // Once the size of stored archives exceeds this we will start pruning old data
 const CACHE_SIZE_MB = 50;
-// Time to keep seeding archives until closing
-const CLOSE_ARCHIVES_AFTER_MS = 1000 * 60 * 10;
 
 const library = new DatLibrary();
 library.init().then(() => {
