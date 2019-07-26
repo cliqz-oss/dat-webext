@@ -23,7 +23,7 @@
     "dat-dns": "^4.0.1",
     "hypercore-crypto": "^1.0.0",
     "hyperdiscovery": "^10.0.0",
-    "hyperdrive": "^9.14.5",
+    "hyperdrive": "^9.15.0",
     "mime": "^2.4.4",
     "parse-dat-url": "^3.0.1",
     "pauls-dat-api": "^8.1.0",
