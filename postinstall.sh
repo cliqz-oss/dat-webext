@@ -10,4 +10,4 @@ cp node_modules/bulma/css/* addon/assets/
 mv ./node_modules/hyperdiscovery/package.json ./node_modules/hyperdiscovery/package.web.json && \
     node -e "var p = require(\"./node_modules/hyperdiscovery/package.web.json\"); delete p.browser; console.log(JSON.stringify(p, null, \"  \"));" > ./node_modules/hyperdiscovery/package.json
 # Fix bug with nextTick in hypercore
-sed -i "s/require('process-nextick-args')/process.nextTick/g" ./node_modules/hypercore/index.js
+sed -i '' "s/require('process-nextick-args')/process.nextTick/g" ./node_modules/hypercore/index.js
