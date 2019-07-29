@@ -40,7 +40,7 @@
     "cross-env": "^5.2.0",
     "browserify": "^16.3.0",
     "tsify": "^4.0.1",
-    "typescript": "^3.2.2",
+    "typescript": "^3.5.3",
     "web-ext-types": "^3.1.0"
   }
 }
