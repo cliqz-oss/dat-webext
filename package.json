@@ -38,7 +38,7 @@
     "@sammacbeth/tape-ext": "0.5.1",
     "@sammacbeth/webextify": "16.2.8",
     "cross-env": "^5.2.0",
-    "browserify": "^16.3.0",
+    "browserify": "^16.5.0",
     "tsify": "^4.0.1",
     "typescript": "^3.5.3",
     "web-ext-types": "^3.1.0"
