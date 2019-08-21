@@ -64,6 +64,11 @@
         },
         "TCPSocket": {
             "schema": "libdweb/toolkit/components/extensions/schemas/tcp.json",
+            "parent": {
+                "scopes": ["addon_parent"],
+                "paths": [["TCPSocket"]],
+                "script": "libdweb/toolkit/components/extensions/parent/ext-tcp.js"
+            },
             "child": {
                 "scopes": [
                     "addon_child"
