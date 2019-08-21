@@ -1,4 +1,4 @@
-FROM node:10.14.0-stretch
+FROM node:10.16.0-stretch
 
 ARG DEBIAN_FRONTEND=noninteractive
 # python dependencies for balrog submitter
@@ -11,7 +11,6 @@ RUN pip install \
   requests==2.18.4
 
 # update npm and prepare dependencies
-RUN npm install -g npm@latest
 RUN mkdir /app
 RUN chown node:node -R /app
 USER node

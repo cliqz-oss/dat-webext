@@ -15,7 +15,6 @@ node('docker') {
             sh 'rm -rf ./web-ext-artifacts'
             sh 'cp -r /app/node_modules ./'
             sh 'npm run postinstall'
-            sh 'node update_version.js'
             sh 'npm run build'
             sh 'npm run package'
         }
