@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "Dat Protocol",
-    "version": "0.0.10",
+    "version": "0.0.11",
     "applications": {
         "gecko": {
             "id": "dat@cliqz.com"
@@ -65,8 +65,14 @@
         "TCPSocket": {
             "schema": "libdweb/toolkit/components/extensions/schemas/tcp.json",
             "parent": {
-                "scopes": ["addon_parent"],
-                "paths": [["TCPSocket"]],
+                "scopes": [
+                    "addon_parent"
+                ],
+                "paths": [
+                    [
+                        "TCPSocket"
+                    ]
+                ],
                 "script": "libdweb/toolkit/components/extensions/parent/ext-tcp.js"
             },
             "child": {
