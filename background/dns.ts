@@ -62,7 +62,7 @@ class DNSCache {
 const lookupCache = new DNSCache();
 const datDns = datDnsFactory({
   persistentCache: lookupCache,
-  dnsHost: 'dns.quad9.net',
+  dnsHost: 'dns.quad9.net:5053',
   dnsPath: '/dns-query',
 });
 
