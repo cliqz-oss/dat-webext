@@ -30,7 +30,7 @@ class DatApi {
   disablePrompts: boolean
 
   constructor(library: DatLibrary, opts: ApiOptions = {}) {
-    const disablePrompts = !!opts.disablePrompts;
+    const disablePrompts = !!opts.disablePrompts || !browser.windows;
     const getArchiveFromUrl = library.getArchiveFromUrl.bind(library);
     this.listenerStreams = new Map();
     const listenerStreams = this.listenerStreams
