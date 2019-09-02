@@ -132,7 +132,7 @@ export default class Network {
     await pda.exportArchiveToArchive({
       srcArchive,
       dstArchive,
-      skipUndownloadedFiles: true,
+      skipUndownloadedFiles: false,
       ignore: ['/.dat', '/.git', '/dat.json'],
     });
     return new DatArchiveImpl({ key: address, dataStructure: dstArchive });;
