@@ -69,16 +69,20 @@ export default class DatLibrary {
     state.open = !!open;
     if (open) {
       const drive = await this.node.getHyperdrive(key);
-      state.content = {
-        length: drive.content.length,
-        byteLength: drive.content.byteLength,
-        downloaded: drive.content.downloaded(),
-      };
-      state.metadata = {
-        length: drive.metadata.length,
-        byteLength: drive.metadata.byteLength,
-        downloaded: drive.metadata.downloaded(),
-      };
+      if (drive.content) {
+        state.content = {
+          length: drive.content.length,
+          byteLength: drive.content.byteLength,
+          downloaded: drive.content.downloaded(),
+        };
+      }
+      if (drive.metadata) {
+        state.metadata = {
+          length: drive.metadata.length,
+          byteLength: drive.metadata.byteLength,
+          downloaded: drive.metadata.downloaded(),
+        };
+      }
       const archive = await this.node.getArchive(key);
       const { title, description, type } = await archive.getInfo({ timeout: 30000 });
       state.title = title;
