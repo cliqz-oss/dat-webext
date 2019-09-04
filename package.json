@@ -3,10 +3,10 @@
   "version": "0.0.13",
   "description": "",
   "scripts": {
-    "build:test": "webextify -r fs:graceful-fs -e test/test.ts -p tsify > test/test-bundle.js && browserify -e ./web-api/web-api.js > test/web-api.js",
+    "build:test": "browserify -r fs:graceful-fs -e test/test.ts -p tsify -g @sammacbeth/libdwebify > test/test-bundle.js && browserify -e ./web-api/web-api.js > test/web-api.js",
     "test": "npm run build:test && tape-ext ./test/manifest.json",
     "build": "npm run build:background && npm run build:webapi",
-    "build:background": "webextify -r fs:graceful-fs -e background/index.ts -p tsify > addon/background.js",
+    "build:background": "browserify -r fs:graceful-fs -e background/index.ts -p tsify -g @sammacbeth/libdwebify > addon/background.js",
     "build:webapi": "browserify -e ./web-api/web-api.js > addon/web-api.js",
     "start": "cross-env MOZ_DISABLE_CONTENT_SANDBOX=1 web-ext run -s addon --firefox=firefoxdeveloperedition --no-reload -u about:debugging",
     "postinstall": "bash ./postinstall.sh",
@@ -22,7 +22,7 @@
     "bulma": "^0.7.5",
     "dat-dns": "^4.0.1",
     "hypercore-crypto": "^1.0.0",
-    "hyperdiscovery": "^10.0.0",
+    "hyperdiscovery": "^10.0.1",
     "hyperdrive": "^9.15.0",
     "mime": "^2.4.4",
     "parse-dat-url": "^3.0.3",
@@ -35,10 +35,10 @@
     "web-ext": "^3.1.1"
   },
   "devDependencies": {
+    "@sammacbeth/libdwebify": "^1.0.0",
     "@sammacbeth/tape-ext": "0.5.1",
-    "@sammacbeth/webextify": "16.2.8",
-    "cross-env": "^5.2.0",
     "browserify": "^16.5.0",
+    "cross-env": "^5.2.1",
     "tsify": "^4.0.1",
     "typescript": "^3.5.3",
     "web-ext-types": "^3.2.1"
