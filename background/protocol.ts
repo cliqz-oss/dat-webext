@@ -45,7 +45,7 @@ class DatHandler {
     const path = decodeURIComponent(pathname);
     let lastPath;
 
-    async function tryStat(testPath) {
+    async function tryStat(testPath: string) {
       try {
         lastPath = testPath;
         return await archive.stat(testPath, { timeout: timeoutAt - Date.now() });
