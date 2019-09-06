@@ -1,4 +1,4 @@
-import { EventEmitter } from "events";
+import Hyperdrive from '@sammacbeth/types/hyperdrive';
 
 export interface CreateOptions {
   title?: string
@@ -13,23 +13,6 @@ export interface SelectArchiveOptions {
     isOwner: boolean
     type?: string | string[]
   }
-}
-
-export interface Hypercore {
-  key: Buffer
-  secretKey: Buffer
-  length: number
-  byteLength: number
-  downloaded(): number
-}
-
-export interface Hyperdrive {
-  key: Buffer
-  writable: boolean
-  content: Hypercore
-  metadata: Hypercore
-  checkout(version: number): Hyperdrive
-  createReadStream(path, opts?): EventEmitter
 }
 
 export interface DatArchive {

@@ -41,3 +41,12 @@ declare module '@sammacbeth/dat-archive-web' {
   }
 }
 
+declare module 'hyperdrive' {
+  import Hyperdrive from '@sammacbeth/types/hyperdrive';
+  export = Hyperdrive
+}
+
+declare module 'hypercore' {
+  import Hypercore from '@sammacbeth/types/hypercore';
+  export = Hypercore
+}

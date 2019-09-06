@@ -1,9 +1,9 @@
-import * as Discovery from 'hyperdiscovery';
-import * as Hyperdrive from 'hyperdrive';
-import * as DatArchiveImpl from '@sammacbeth/dat-node/lib/dat-archive'
-import * as RandomAccess from 'random-access-idb-mutable-file';
+import Discovery = require('hyperdiscovery');
+import Hyperdrive = require('hyperdrive');
+import DatArchiveImpl = require('@sammacbeth/dat-node/lib/dat-archive')
+import RandomAccess = require('random-access-idb-mutable-file');
 import { keyPair } from 'hypercore-crypto';
-import * as pda from 'pauls-dat-api';
+import pda = require('pauls-dat-api');
 import { CreateOptions, DatArchive } from './dat';
 
 export default class Network {
