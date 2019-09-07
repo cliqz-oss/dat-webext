@@ -2,6 +2,7 @@ import * as parseUrl from 'parse-dat-url';
 import DatLibrary from '../background/library';
 import DatHandler from '../background/protocol';
 import DatApi from '../background/api';
+import DatDb from '../background/db';
 
 const { test } = browser.test;
 
@@ -20,10 +21,10 @@ const testWithTimeout = (name: string, testFn: (assert: browser.test.Assert) => 
 // we have to register the protocol so the URL implementation
 // recognises dat:// as a protocol.
 
-const library = new DatLibrary();
+const db = new DatDb();
+const library = new DatLibrary(db);
 const protocolHandler = new DatHandler(library.getArchiveFromUrl.bind(library));
 const api = new DatApi(library, { disablePrompts: true });
-const ready = library.init();
 browser.protocol.registerProtocol('dat', (request) => {
   return protocolHandler.handleRequest(request);
 });
@@ -42,7 +43,6 @@ const datArchiveTestListener = new Promise((resolve) => {
 });
 
 testWithTimeout('DatArchive API', async (assert) => {
-  await ready;
   const parseTestEvent = ([status, e]) => {
     if (status === 'fail') {
       assert.fail(e.fullTitle);
@@ -57,15 +57,12 @@ testWithTimeout('DatArchive API', async (assert) => {
 }, 60000);
 
 testWithTimeout('Dat Network', async (assert) => {
-  await ready;
   const archive = await library.getArchive('sammacbeth.eu');
   assert.ok(!(await archive.getInfo()).isOwner);
   assert.ok((await archive.readdir('/')).includes('index.html'));
 }, 30000);
 
 testWithTimeout('Protocol handler', async (assert) => {
-  await ready;
-
   const resolveUrl = async (url: string) => {
     const { pathname, version } = parseUrl(url);
     const { path } = await protocolHandler.resolvePath(url, pathname, parseInt(version));
@@ -86,7 +83,6 @@ testWithTimeout('Protocol handler', async (assert) => {
 
 
 test('Dat DNS', async (assert) => {
-  await ready;
   const addr = await library.dns.resolve('dat://sammacbeth.eu');
   assert.equal(addr, '41f8a987cfeba80a037e51cc8357d513b62514de36f2f9b3d3eeec7a8fb3b5a5');
 })

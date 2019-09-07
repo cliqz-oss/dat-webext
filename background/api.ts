@@ -1,7 +1,8 @@
 import Spanan from 'spanan';
-import { DatArchive, CreateOptions, SelectArchiveOptions } from './dat';
+import { DatArchive, DatManifest, SelectArchiveOptions } from './dat';
 import dialog from './dialog';
-import DatLibrary, { ArchiveMetadata } from './library';
+import DatLibrary from './library';
+import { IDatInfo } from './db';
 
 interface CloseableEventTarget extends EventTarget {
   close(): void
@@ -18,13 +19,13 @@ class DatApi {
     key: string
   }>
   privateApi: {
-    create(opts: CreateOptions): Promise<string>
-    fork(url: string, opts: CreateOptions): Promise<string>
+    create(opts: DatManifest): Promise<string>
+    fork(url: string, opts: DatManifest): Promise<string>
     dialogResponse(message: any): void
     getArchive(url: string): Promise<DatArchive>
-    listLibrary(): Promise<ArchiveMetadata[]>
+    listLibrary(): Promise<IDatInfo[]>
     download(url: string): Promise<void>
-    forkAndLoad(url: string, opts: CreateOptions): Promise<void>
+    forkAndLoad(url: string, opts: DatManifest): Promise<void>
   }
   api: any
   disablePrompts: boolean
@@ -41,15 +42,13 @@ class DatApi {
     const events = apiWrapper.createProxy();
 
     const privateApi = this.privateApi = {
-      async create(opts: CreateOptions) {
-        const archive = await library.node.createArchive(opts);
-        library._addLibraryEntry(archive);
+      async create(opts: DatManifest) {
+        const archive = await library.createArchive(opts);
         return archive.url;
       },
       async fork(url, opts) {
         const addr = await library.dns.resolve(url);
-        const archive = await library.node.forkArchive(addr, opts);
-        library._addLibraryEntry(archive);
+        const archive = await library.forkArchive(addr, opts);
         return archive.url;
       },
       async dialogResponse(message) {
@@ -65,7 +64,7 @@ class DatApi {
         const archive = await getArchiveFromUrl(url);
         await archive.download();
       },
-      async forkAndLoad(url: string, opts: CreateOptions) {
+      async forkAndLoad(url: string, opts: DatManifest) {
         const addr = await dialog.open({
           action: 'fork',
           opts: {
@@ -85,7 +84,7 @@ class DatApi {
       resolveName(name) {
         return library.dns.resolve(name);
       },
-      async create(opts: CreateOptions = {}) {
+      async create(opts: DatManifest = {}) {
         if (disablePrompts) {
           return privateApi.create(opts);
         }
@@ -97,7 +96,7 @@ class DatApi {
           }
         });
       },
-      async fork(url: string, opts: CreateOptions = {}) {
+      async fork(url: string, opts: DatManifest = {}) {
         if (disablePrompts) {
           return privateApi.fork(url, opts);
         }

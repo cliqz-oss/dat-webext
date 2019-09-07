@@ -16,6 +16,7 @@
   "author": "Sam Macbeth",
   "license": "MIT",
   "dependencies": {
+    "@cliqz-oss/dexie": "^2.0.4",
     "@sammacbeth/dat-node": "1.0.3",
     "@sammacbeth/libdweb": "0.0.8",
     "@sammacbeth/types": "^1.1.0",

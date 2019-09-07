@@ -4,7 +4,7 @@ import DatArchiveImpl = require('@sammacbeth/dat-node/lib/dat-archive')
 import RandomAccess = require('random-access-idb-mutable-file');
 import { keyPair } from 'hypercore-crypto';
 import pda = require('pauls-dat-api');
-import Dat, { CreateOptions, DatArchive } from './dat';
+import Dat, { DatManifest, DatArchive } from './dat';
 
 export default class Network {
 
@@ -124,15 +124,15 @@ export default class Network {
     return dat.archive;
   }
 
-  async createArchive(opts: CreateOptions): Promise<DatArchive> {
+  async createDat(opts: DatManifest): Promise<Dat> {
     const kp = keyPair();
     const dat = await this.loadDat(kp.publicKey, kp.secretKey);
     pda.writeManifest(dat.drive, opts);
     await dat.joinNetwork();
-    return dat.archive;
+    return dat;
   }
 
-  async forkArchive(addr: string, manifest: CreateOptions): Promise<DatArchive> {
+  async forkDat(addr: string, manifest: DatManifest): Promise<Dat> {
     // load source
     const srcDat = await this.getDat(addr);
     // get source manifest
@@ -158,16 +158,24 @@ export default class Network {
       skipUndownloadedFiles: false,
       ignore: ['/.dat', '/.git', '/dat.json'],
     });
-    return dstDat.archive;
+    return dstDat;
   }
 
-  closeArchive(key: string): void {
+  async closeArchive(key: string): Promise<void> {
     const dat = this.dats.get(key);
     if (!dat) {
       return;
     }
-    dat.close()
     this.dats.delete(key);
+    return new Promise(resolve => {
+      dat.drive.once('close', resolve);
+      dat.close();
+    });
+  }
+
+  async deleteArchive(key: string): Promise<void> {
+    await this.closeArchive(key);
+    window.indexedDB.deleteDatabase(key);
   }
 
   isSwarming(key: string): boolean {

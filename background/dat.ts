@@ -1,7 +1,7 @@
 import Hyperdrive from '@sammacbeth/types/hyperdrive';
 import DatArchiveImpl = require('@sammacbeth/dat-node/lib/dat-archive')
 
-export interface CreateOptions {
+export interface DatManifest {
   title?: string
   description?: string
   type?: string

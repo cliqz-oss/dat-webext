@@ -26,7 +26,7 @@ getTab().then(async (tab) => {
   });
 
   const { title, description, peers, size, key, isOwner } = await api.api.getInfo(tab.url);
-  const { forceSeeding } = await library.getArchiveState(key);
+  const { seedingMode } = await library.getDatInfo(key);
 
   document.getElementById('dat-title').innerText = title;
   if (description) {
@@ -36,7 +36,7 @@ getTab().then(async (tab) => {
   if (isOwner) {
     peerInfo.innerHTML += ' | <span class="tag is-info">Writable</span>';
   }
-  if (isOwner || forceSeeding) {
+  if (seedingMode == 1) {
     seedingButton.setAttribute('checked', 'checked');
     if (isOwner) {
       seedingButton.setAttribute('disabled', true);
@@ -44,8 +44,6 @@ getTab().then(async (tab) => {
   }
 
   seedingButton.addEventListener('change', async (ev) => {
-    const state = await library.getArchiveState(key);
-    state.forceSeeding = seedingButton.checked;
-    library._persistArchives();
+    library.setSeedingMode(key, 1);
   })
 });
