@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
-import Dat, { DatArchive, DatManifest } from './dat';
-import resolve from './dns';
+import { DatManifest } from './dat';
+import DatDNS from './dns';
 import Network from './network';
 import DatDb, { IDatInfo } from './db';
 
@@ -8,10 +8,6 @@ import DatDb, { IDatInfo } from './db';
 EventEmitter.defaultMaxListeners = 100;
 
 const DEFAULT_SEED_TIME = 1e3 * 60 * 10; // 10 mins
-
-interface DatDNS {
-  resolve(name: string): Promise<string>
-}
 
 export default class DatLibrary {
 
@@ -22,9 +18,7 @@ export default class DatLibrary {
   constructor(db: DatDb) {
     // this.storageLock = Promise.resolve();
     this.db = db;
-    this.dns = {
-      resolve,
-    }
+    this.dns = new DatDNS(this.db);
     this._createNode();
   }
 
