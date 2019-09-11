@@ -62,6 +62,7 @@ export default class DatLibrary {
     const key = await this.dns.resolve(url);
     try {
       const dat = await this.node.getDat(key);
+      await dat.ready;
       const archive = dat.archive;
       if (archive._version !== version) {
         archive._checkout = version ? dat.drive.checkout(version) : dat.drive;

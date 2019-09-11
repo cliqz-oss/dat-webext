@@ -115,7 +115,11 @@ export default class Network {
     }
     const dat = await this.loadDat(Buffer.from(address, 'hex'));
     if (autoSwarm) {
-      await dat.joinNetwork();
+      try {
+        await dat.joinNetwork();
+      } catch (e) {
+        this.dats.delete(address);
+      }
     }
     return dat;
   }

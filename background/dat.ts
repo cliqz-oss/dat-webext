@@ -31,6 +31,7 @@ export default class Dat {
   drive: Hyperdrive
   archive: DatArchive
   isSwarming: boolean
+  ready: Promise<void>
   _swarm: any
 
   constructor(drive: Hyperdrive, swarm: any) {
@@ -41,6 +42,16 @@ export default class Dat {
     });
     this.isSwarming = false;
     this._swarm = swarm;
+    this.ready = new Promise((resolve, reject) => {
+      if (!this.drive.writable && !this.drive.metadata.length) {
+        this.drive.metadata.update(err => {
+          if (err) reject(err)
+          else resolve()
+        })
+      } else {
+        resolve();
+      }
+    });
   }
 
   get isOwner() {
@@ -51,15 +62,8 @@ export default class Dat {
     this._swarm.add(this.drive);
 
     // await initial metadata sync if not the owner
-    if (!this.drive.writable && !this.drive.metadata.length) {
-      // wait to receive a first update
-      await new Promise((resolve, reject) => {
-        this.drive.metadata.update(err => {
-          if (err) reject(err)
-          else resolve()
-        })
-      })
-    }
+    await this.ready;
+
     if (!this.drive.writable) {
       // always download all metadata
       this.drive.metadata.download({start: 0, end: -1})
