@@ -38,6 +38,12 @@ setInterval(async () => {
   // get archives which have active listeners
   const activeStreams = new Set();
   api.listenerStreams.forEach(({ key }) => activeStreams.add(key));
+  const tabs = await browser.tabs.query({});
+  const openDatUrls = new Set(await Promise.all(
+    tabs
+      .filter(({ url }) => url.startsWith('dat://'))
+      .map(({ url }) => library.dns.resolve(url)))
+  );
 
   // close dats we're not using anymore
   archives.filter(a => 
@@ -45,8 +51,10 @@ setInterval(async () => {
     a.seedUntil < Date.now() &&
     !a.isOwner && 
     a.seedingMode === 0 && 
-    !activeStreams.has(a.key))
+    !activeStreams.has(a.key) &&
+    !openDatUrls.has(a.key))
   .forEach((a) => {
+    console.log('close archive', a.key);
     library.closeArchive(a.key);
   });
 

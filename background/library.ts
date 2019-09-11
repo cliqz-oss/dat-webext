@@ -7,7 +7,7 @@ import DatDb, { IDatInfo } from './db';
 // suppress listener warnings
 EventEmitter.defaultMaxListeners = 100;
 
-const DEFAULT_SEED_TIME = 1e3 * 60 * 10; // 10 mins
+const DEFAULT_SEED_TIME = 1e3 * 60 * 5; // 5 mins
 
 export default class DatLibrary {
 

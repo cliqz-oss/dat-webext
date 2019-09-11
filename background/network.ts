@@ -94,6 +94,7 @@ export default class Network {
     }
     this.dats.clear();
     this.swarm.close();
+    this._swarm = null;
     this.connections = {};
   }
 
