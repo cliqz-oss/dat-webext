@@ -1,21 +1,15 @@
 import DatHandler from './protocol';
 import DatLibrary from './library';
 import DatApi from './api';
+import DatDb from './db';
 
 browser.processScript.setAPIScript(browser.runtime.getURL('web-api.js'));
 
 // Once the size of stored archives exceeds this we will start pruning old data
 const CACHE_SIZE_MB = 50;
 
-const library = new DatLibrary();
-library.init().then(() => {
-  // load my own archives and seeding archives
-  library.getArchives().filter(a => a.isOwner || a.forceSeeding)
-  .forEach((a) => {
-    console.log('load', a.key);
-    library.getArchive(a.key)
-  });
-});
+const db = new DatDb();
+const library = new DatLibrary(db);
 
 (<any>window).library = library;
 
@@ -33,33 +27,42 @@ browser.protocol.registerProtocol('dat', (request) => {
 const api = new DatApi(library);
 (<any>window).api = api;
 
-
+library.db.library.where('seedingMode').above(0).each(({ key }) => {
+  console.log('load', key);
+  library.getArchive(key);
+});
 
 // manage open archives
 setInterval(async () => {
-  const archives = await library.getArchivesStates();
+  const archives = await library.db.library.toArray();
   // get archives which have active listeners
   const activeStreams = new Set();
   api.listenerStreams.forEach(({ key }) => activeStreams.add(key));
+  const tabs = await browser.tabs.query({});
+  const openDatUrls = new Set(await Promise.all(
+    tabs
+      .filter(({ url }) => url.startsWith('dat://'))
+      .map(({ url }) => library.dns.resolve(url)))
+  );
 
-  archives.filter((a) => a.open && 
+  // close dats we're not using anymore
+  archives.filter(a => 
+    library.node.isSwarming(a.key) &&
+    a.seedUntil < Date.now() &&
     !a.isOwner && 
-    !activeStreams.has(a.key) && 
-    !a.forceSeeding &&
-    a.seedUntil < Date.now())
+    a.seedingMode === 0 && 
+    !activeStreams.has(a.key) &&
+    !openDatUrls.has(a.key))
   .forEach((a) => {
+    console.log('close archive', a.key);
     library.closeArchive(a.key);
   });
-  const calculateUsage = (type) => type ? (type.downloaded / type.length) * type.byteLength : 0;
-  const mb = 1024 * 1024;
-  const usage = archives
-    .filter(a => !a.isOwner)
-    .map(a => ({ key: a.key, size: (calculateUsage(a.metadata) + calculateUsage(a.content)) / mb }));
-  const totalUsage = usage.reduce((acc, a) => acc + (a.size || 0), 0);
+
+  let totalUsage = archives.reduce((acc, { size }) => acc + size, 0) / 1e6;
   // prune data
   if (totalUsage > CACHE_SIZE_MB) {
     const pruneable = archives
-      .filter(a => !a.open && !a.isOwner && !activeStreams.has(a.key))
+      .filter(a => !library.node.isSwarming(a.key) && !a.isOwner && !activeStreams.has(a.key))
       .sort((a, b) => a.lastUsed - b.lastUsed);
     if (pruneable.length > 0) {
       console.log('prune archive', pruneable[0].key);

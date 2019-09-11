@@ -18,6 +18,7 @@ const ERROR = {
   ARCHIVE_LOAD_TIMEOUT: 'ARCHIVE_LOAD_TIMEOUT',
   NOT_FOUND: 'NOT_FOUND',
   DIRECTORY: 'DIRECTORY',
+  NETWORK_TIMEOUT: 'NETWORK_TIMEOUT',
 }
 
 class DatHandler {
@@ -45,7 +46,7 @@ class DatHandler {
     const path = decodeURIComponent(pathname);
     let lastPath;
 
-    async function tryStat(testPath) {
+    async function tryStat(testPath: string) {
       try {
         lastPath = testPath;
         return await archive.stat(testPath, { timeout: timeoutAt - Date.now() });
@@ -105,18 +106,35 @@ class DatHandler {
         try {
           const { archive, path } = await self.resolvePath(request.url, pathname, parseInt(version));
           const stream = archive._checkout.createReadStream(path, { start: 0 });
+          let streamComplete;
+          let gotFirstChunk = false
+          const streamTimeout = new Promise<void>((resolve, reject) => {
+            const timeout = setTimeout(() => {
+              if (!gotFirstChunk) {
+                return reject(new Error(ERROR.NETWORK_TIMEOUT));
+              }
+              return resolve();
+            }, 30000);
+            streamComplete = () => {
+              clearTimeout(timeout);
+              resolve();
+            };
+          })
           stream.on('close', () => {
             controller.close();
           });
           stream.on('end', () => {
             controller.close();
+            streamComplete();
           });
           stream.on('error', (e) => {
             controller.error(e);
           });
           stream.on('data', (chunk) => {
+            gotFirstChunk = true;
             controller.enqueue(chunk);
           });
+          await streamTimeout;
         } catch (e) {
           if (e instanceof DNSLookupFailed) {
             controller.enqueue(`Dat DNS Lookup failed for ${e.message}`);
@@ -128,6 +146,8 @@ class DatHandler {
             const req = await fetch('/pages/directory.html');
             const contents = await req.text();
             controller.enqueue(contents);
+          } else if (e.message === ERROR.NETWORK_TIMEOUT) {
+            controller.enqueue('Timed out while loading file from the network')
           } else {
             console.error(e);
             controller.enqueue(`Unexpected error: ${e.toString()}`);
