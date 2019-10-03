@@ -1,17 +1,68 @@
 import Discovery = require('hyperdiscovery');
+import WRTCDiscovery = require('@geut/discovery-swarm-webrtc');
 import Hyperdrive = require('hyperdrive');
 import DatArchiveImpl = require('@sammacbeth/dat-node/lib/dat-archive')
 import RandomAccess = require('random-access-idb-mutable-file');
 import { keyPair } from 'hypercore-crypto';
 import pda = require('pauls-dat-api');
 import Dat, { DatManifest, DatArchive } from './dat';
+import { EventEmitter } from 'events';
+
+class MultiSwarm extends EventEmitter {
+  disc: Discovery;
+  wrtc: WRTCDiscovery;
+
+  constructor() {
+    super();
+    this.disc = Discovery({
+      autoListen: false,
+    });
+    this.disc._port = undefined;
+    this.disc.listen();
+    this.wrtc = WRTCDiscovery({
+      id: this.disc.id,
+      bootstrap: ['https://signal.dat-web.eu'],
+      stream: this.disc._createReplicationStream.bind(this.disc),
+    });
+    // reemit events
+    ['listening', 'join', 'leave', 'peer', 'connecting', 'connect-failed', 'handshaking',
+    'handshake-timeout', 'connection', 'connection-closed', 'error']
+    .forEach((event) => {
+      this.disc.on(event, (...args) => {
+        console.log(`[${event}]`, args);
+        this.emit(event, ...args);
+      });
+    });
+    ['peer', 'connection', 'connection-closed', 'candidates'].forEach((event) => {
+      this.wrtc.on(event, (...args) => {
+        console.log(`[wrtc_${event}]`, args);
+        this.emit(event, ...args);
+      });
+    });
+  }
+
+  add(drive: Hyperdrive) {
+    this.disc.add(drive);
+    this.wrtc.join(drive.discoveryKey);
+  }
+
+  leave(discoveryKey: Buffer) {
+    this.disc.leave(discoveryKey);
+    this.wrtc.leave(discoveryKey);
+  }
+
+  close() {
+    this.disc.close();
+    this.wrtc.close();
+  }
+}
 
 export default class Network {
 
   SWARM_RESTART_AFTER = 1000 * 60 * 20;
 
   private dats: Map<string, Dat> = new Map();
-  private _swarm: Discovery;
+  private _swarm: MultiSwarm;
   private connections: { [key: string]: number } = {};
   private swarmCreatedAt: number;
 
@@ -41,12 +92,12 @@ export default class Network {
           this.getDat(feed);
         });
       }
-    }, 60000);
+    }, 300000);
   }
 
   get swarm() {
     if (!this._swarm) {
-      this._swarm = Discovery({});
+      this._swarm = new MultiSwarm();
       this._swarm.on('connection', ({ key }) => {
         const keyStr = key.toString('hex');
         if (!this.connections[keyStr]) {
@@ -71,9 +122,6 @@ export default class Network {
         }
       });
       this.swarmCreatedAt = Date.now();
-      ['peer', 'connecting', 'connect-failed', 'handshaking', 'handshake-timeout', 'connection', 'connection-closed', 'error'].forEach((event) => {
-        this._swarm.on(event, (v) => console.log(`[${event}]`, v));
-      });
     }
     return this._swarm;
   }

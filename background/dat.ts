@@ -60,6 +60,7 @@ export default class Dat {
 
   async joinNetwork() {
     this._swarm.add(this.drive);
+    this.isSwarming = true;
 
     // await initial metadata sync if not the owner
     await this.ready;
