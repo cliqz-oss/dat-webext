@@ -41,7 +41,7 @@
     "@sammacbeth/libdwebify": "^1.0.0",
     "@sammacbeth/tape-ext": "0.5.1",
     "browserify": "^16.5.0",
-    "cross-env": "^5.2.1",
+    "cross-env": "^6.0.3",
     "tsify": "^4.0.1",
     "typescript": "^3.5.3",
     "web-ext-types": "^3.2.1"
