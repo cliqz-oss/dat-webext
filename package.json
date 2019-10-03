@@ -17,6 +17,7 @@
   "license": "MIT",
   "dependencies": {
     "@cliqz-oss/dexie": "^2.0.4",
+    "@geut/discovery-swarm-webrtc": "^2.2.3",
     "@sammacbeth/dat-node": "1.0.3",
     "@sammacbeth/libdweb": "0.0.8",
     "@sammacbeth/types": "^1.1.0",
@@ -25,7 +26,7 @@
     "bulma": "^0.7.5",
     "dat-dns": "^4.0.3",
     "hypercore-crypto": "^1.0.0",
-    "hyperdiscovery": "^10.0.1",
+    "hyperdiscovery": "^10.1.0",
     "hyperdrive": "^9.15.0",
     "mime": "^2.4.4",
     "parse-dat-url": "^3.0.3",
