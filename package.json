@@ -36,7 +36,7 @@
     "random-access-memory": "^3.1.1",
     "spanan": "^2.1.0",
     "stream-to-async-iterator": "^0.2.0",
-    "web-ext": "^3.1.1"
+    "web-ext": "^3.2.0"
   },
   "devDependencies": {
     "@sammacbeth/libdwebify": "^1.0.0",
