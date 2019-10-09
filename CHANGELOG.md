@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.0.15] - 2019-10-04
+
+ * We now use [discovery-swarm-webrtc](https://github.com/geut/discovery-swarm-webrtc) in tandem with standard DAT discovery in order to improve peer connectivity.
+
 ## [0.0.14] - 2019-09-12
  
  * Added UTP support using utp-wasm (#60).
@@ -22,6 +26,7 @@
  * Update libdweb dependency: TCPSocket in parent process
  * Bump various dependencies.
 
+[0.0.15]:https://github.com/cliqz-oss/dat-webext/compare/v0.0.14...v0.0.15
 [0.0.14]: https://github.com/cliqz-oss/dat-webext/compare/v0.0.13...v0.0.14
 [0.0.13]: https://github.com/cliqz-oss/dat-webext/compare/v0.0.12...v0.0.13
 [0.0.12]: https://github.com/cliqz-oss/dat-webext/compare/v0.0.11...v0.0.12
