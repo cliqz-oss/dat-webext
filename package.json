@@ -18,9 +18,9 @@
   "dependencies": {
     "@cliqz-oss/dexie": "^2.0.4",
     "@geut/discovery-swarm-webrtc": "^2.2.3",
+    "@sammacbeth/dat-api": "file:../sams-dat-api",
     "@sammacbeth/dat-node": "1.0.3",
     "@sammacbeth/libdweb": "0.0.8",
-    "@sammacbeth/types": "^1.1.0",
     "@sammacbeth/utp-wasm": "^1.1.5",
     "base64-js": "^1.3.1",
     "bulma": "^0.7.5",
@@ -41,10 +41,12 @@
   "devDependencies": {
     "@sammacbeth/libdwebify": "^1.0.0",
     "@sammacbeth/tape-ext": "0.5.1",
+    "@sammacbeth/types": "^1.1.1",
+    "@types/node": "^12.11.1",
     "browserify": "^16.5.0",
     "cross-env": "^6.0.3",
     "tsify": "^4.0.1",
-    "typescript": "^3.5.3",
+    "typescript": "^3.6.3",
     "web-ext-types": "^3.2.1"
   }
 }

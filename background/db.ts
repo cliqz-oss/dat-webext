@@ -1,5 +1,6 @@
 import Dexie from '@cliqz-oss/dexie';
-import Dat, { DatManifest } from './dat';
+import { DatManifest } from './dat';
+import Dat from '@sammacbeth/dat-api/lib/dat';
 
 export default class Database extends Dexie {
 

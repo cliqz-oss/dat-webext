@@ -81,7 +81,7 @@ class DatApi {
     }
 
     this.api = {
-      resolveName(name) {
+      resolveName(name: string) {
         return library.dns.resolve(name);
       },
       async create(opts: DatManifest = {}) {

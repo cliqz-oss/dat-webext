@@ -14,7 +14,7 @@ const library = new DatLibrary(db);
 (<any>window).library = library;
 
 window.addEventListener('beforeunload', () => {
-  library.node.close();
+  library.api.shutdown();
 })
 
 const getArchiveFromUrl = library.getArchiveFromUrl.bind(library);
@@ -47,7 +47,8 @@ setInterval(async () => {
 
   // close dats we're not using anymore
   archives.filter(a => 
-    library.node.isSwarming(a.key) &&
+    library.api.dats.has(a.key) &&
+    library.api.dats.get(a.key).isSwarming &&
     a.seedUntil < Date.now() &&
     !a.isOwner && 
     a.seedingMode === 0 && 
@@ -62,7 +63,7 @@ setInterval(async () => {
   // prune data
   if (totalUsage > CACHE_SIZE_MB) {
     const pruneable = archives
-      .filter(a => !library.node.isSwarming(a.key) && !a.isOwner && !activeStreams.has(a.key))
+      .filter(a => !library.api.dats.has(a.key) && !a.isOwner && !activeStreams.has(a.key))
       .sort((a, b) => a.lastUsed - b.lastUsed);
     if (pruneable.length > 0) {
       console.log('prune archive', pruneable[0].key);
