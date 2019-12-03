@@ -1,8 +1,10 @@
+import createDatArchive, { IDatArchive } from '@sammacbeth/dat-archive';
 import Spanan from 'spanan';
-import { DatArchive, DatManifest, SelectArchiveOptions } from './dat';
+import { DatManifest, SelectArchiveOptions, DatAPI } from './dat';
 import dialog from './dialog';
 import DatLibrary from './library';
 import { IDatInfo } from './db';
+import DatDNS from './dns';
 
 interface CloseableEventTarget extends EventTarget {
   close(): void
@@ -22,7 +24,7 @@ class DatApi {
     create(opts: DatManifest): Promise<string>
     fork(url: string, opts: DatManifest): Promise<string>
     dialogResponse(message: any): void
-    getArchive(url: string): Promise<DatArchive>
+    getArchive(url: string): Promise<IDatArchive>
     listLibrary(): Promise<IDatInfo[]>
     download(url: string): Promise<void>
     forkAndLoad(url: string, opts: DatManifest): Promise<void>
@@ -30,9 +32,8 @@ class DatApi {
   api: any
   disablePrompts: boolean
 
-  constructor(library: DatLibrary, opts: ApiOptions = {}) {
+  constructor(public node: DatAPI, public dns: DatDNS, public library: DatLibrary, opts: ApiOptions = {}) {
     const disablePrompts = !!opts.disablePrompts || !browser.windows;
-    const getArchiveFromUrl = library.getArchiveFromUrl.bind(library);
     this.listenerStreams = new Map();
     const listenerStreams = this.listenerStreams
     let streamCtr = 0;
@@ -43,25 +44,30 @@ class DatApi {
 
     const privateApi = this.privateApi = {
       async create(opts: DatManifest) {
-        const archive = await library.createArchive(opts);
-        return archive.url;
+        // const archive = await library.createArchive(opts);
+        // return archive.url;
+        return '';
       },
       async fork(url, opts) {
-        const addr = await library.dns.resolve(url);
-        const archive = await library.forkArchive(addr, opts);
-        return archive.url;
+        const addr = await this.dns.resolve(url);
+        // const archive = await library.forkArchive(addr, opts);
+        // return archive.url;
+        return '';
       },
       async dialogResponse(message) {
         dialog.onMessage(message);
       },
-      async getArchive(url) {
-        return await getArchiveFromUrl(url);
+      async getArchive(url): Promise<IDatArchive> {
+        const addr = await this.dns.resolve(url);
+        const dat = await node.getDat(addr, { persist: true, sparse: true, autoSwarm: true });
+        await dat.ready;
+        return createDatArchive(dat.drive);
       },
       async listLibrary() {
         return library.getLibraryArchives();
       },
       async download(url: string) {
-        const archive = await getArchiveFromUrl(url);
+        const archive = await this.privateApi.getArchive(url);
         await archive.download();
       },
       async forkAndLoad(url: string, opts: DatManifest) {
@@ -82,7 +88,7 @@ class DatApi {
 
     this.api = {
       resolveName(name: string) {
-        return library.dns.resolve(name);
+        return this.dns.resolve(name);
       },
       async create(opts: DatManifest = {}) {
         if (disablePrompts) {
@@ -120,31 +126,30 @@ class DatApi {
         });
       },
       async load(url) {
-        const archive = await getArchiveFromUrl(url);
-        await archive._loadPromise;
+        const archive = await this.privateApi.getArchive(url);
         return url;
       },
       async getInfo(url, opts) {
-        const archive = await getArchiveFromUrl(url);
+        const archive = await this.privateApi.getArchive(url);
         return archive.getInfo(opts);
       },
       async configure(url, opts) {
-        const archive = await getArchiveFromUrl(url);
+        const archive = await this.privateApi.getArchive(url);
         return archive.configure(opts);
       },
       async stat(url, path, opts) {
-        const archive = await getArchiveFromUrl(url);
+        const archive = await this.privateApi.getArchive(url);
         const stat = await archive.stat(path, opts);
         stat._isDirectory = stat.isDirectory();
         stat._isFile = stat.isFile();
         return stat;
       },
       async readFile(url, path, opts) {
-        const archive = await getArchiveFromUrl(url);
+        const archive = await this.privateApi.getArchive(url);
         return archive.readFile(path, opts);
       },
       async readdir(url, path, opts) {
-        const archive = await getArchiveFromUrl(url);
+        const archive = await this.privateApi.getArchive(url);
         const listing = await archive.readdir(path, opts);
         if (opts && opts.stat) {
           // serialise stat
@@ -157,35 +162,35 @@ class DatApi {
         return listing;
       },
       async history(url, opts) {
-        const archive = await getArchiveFromUrl(url);
+        const archive = await this.privateApi.getArchive(url);
         return archive.history(opts);
       },
       async writeFile(url, path, data, opts) {
-        const archive = await getArchiveFromUrl(url);
+        const archive = await this.privateApi.getArchive(url);
         return archive.writeFile(path, data, opts);
       },
       async mkdir(url, path) {
-        const archive = await getArchiveFromUrl(url);
+        const archive = await this.privateApi.getArchive(url);
         return archive.mkdir(path);
       },
       async unlink(url, path) {
-        const archive = await getArchiveFromUrl(url);
+        const archive = await this.privateApi.getArchive(url);
         return archive.unlink(path);
       },
       async rmdir(url, path, opts) {
-        const archive = await getArchiveFromUrl(url);
+        const archive = await this.privateApi.getArchive(url);
         return archive.rmdir(path, opts);
       },
       async copy(url, path, dstPath, opts) {
-        const archive = await getArchiveFromUrl(url);
+        const archive = await this.privateApi.getArchive(url);
         return archive.copy(path, dstPath, opts);
       },
       async rename(url, oldPath, newPath, opts) {
-        const archive = await getArchiveFromUrl(url);
+        const archive = await this.privateApi.getArchive(url);
         return archive.rename(oldPath, newPath, opts);
       },
       async watch(url, pattern) {
-        const archive = await getArchiveFromUrl(url);
+        const archive = await this.privateApi.getArchive(url);
         const key = archive._dataStructure.key.toString('hex');
         const streamId = streamCtr++;
         const stream = archive.watch(pattern);
