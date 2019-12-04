@@ -1,7 +1,6 @@
 import Dexie from '@cliqz-oss/dexie';
 import { DatManifest } from './dat';
 import { IDat } from '@sammacbeth/dat-types/lib/dat';
-import Hyperdrive from '@sammacbeth/dat-types/lib/hyperdrive';
 import createDatArchive from '@sammacbeth/dat-archive';
 
 export default class Database extends Dexie {
@@ -23,7 +22,7 @@ export default class Database extends Dexie {
     this.dnsCache = this.table('dnsCache');
   }
 
-  async updateDat(dat: IDat<Hyperdrive>, seedTime: number) {
+  async updateDat(dat: IDat, seedTime: number) {
     const now = Date.now();
     const key = dat.drive.key.toString('hex');
     const lastUpdate = this.keyCache.get(key);

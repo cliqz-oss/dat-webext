@@ -1,5 +1,7 @@
 import apiFactory, { DatV1API } from '@sammacbeth/dat-api-v1wrtc';
 import RandomAccess = require('random-access-idb-mutable-file');
+import HyperdriveAPI from '@sammacbeth/dat-api-core/dist/api';
+import { IHyperdrive } from '@sammacbeth/dat-types/lib/hyperdrive';
 
 export interface DatManifest {
   title?: string

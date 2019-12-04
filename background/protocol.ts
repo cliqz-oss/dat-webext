@@ -1,16 +1,15 @@
 import createHandler, { IsADirectoryError, NotFoundError, NetworkTimeoutError } from '@sammacbeth/dat-protocol-handler';
 import mime = require('mime');
+import parseUrl = require('parse-dat-url');
 import { DatAPI } from './dat';
 import { DNSLookupFailed } from './errors';
 import DatDNS from './dns';
 
 class DatHandler {
 
-  dns: DatDNS;
-  node: DatAPI;
   handler: (url: string, timeout?: number) => Promise<NodeJS.ReadableStream>;
 
-  constructor(dns: DatDNS, node: DatAPI) {
+  constructor(public dns: DatDNS, public node: DatAPI) {
     this.dns = dns;
     this.node = node;
     this.handler = createHandler(this.node, (host) => dns.resolve(host), {
@@ -21,10 +20,12 @@ class DatHandler {
   }
 
   handleRequest(request: browser.protocol.Request): Response {
+    const self = this;
+    const { pathname } = parseUrl(request.url);
     const body = new ReadableStream({
       async start(controller) {
         try {
-          const stream = await this.handler(request.url, 30000);
+          const stream = await self.handler(request.url, 30000);
           let streamComplete;
           let gotFirstChunk = false
           const streamTimeout = new Promise<void>((resolve, reject) => {
@@ -77,7 +78,7 @@ class DatHandler {
     });
     return new Response(body, {
       headers: {
-        "content-type": mime.getType(decodeURIComponent(request.url.split('/', 2)[1])) || 'text/html'
+        "content-type": mime.getType(decodeURIComponent(pathname)) || 'text/html'
       }
     });
   }

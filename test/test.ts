@@ -3,6 +3,8 @@ import DatLibrary from '../background/library';
 import DatHandler from '../background/protocol';
 import DatApi from '../background/api';
 import DatDb from '../background/db';
+import nodeFactory from '../background/dat';
+import DatDNS from '../background/dns';
 
 const { test } = browser.test;
 
@@ -21,10 +23,12 @@ const testWithTimeout = (name: string, testFn: (assert: browser.test.Assert) => 
 // we have to register the protocol so the URL implementation
 // recognises dat:// as a protocol.
 
+const node = nodeFactory();
 const db = new DatDb();
-const library = new DatLibrary(db);
-const protocolHandler = new DatHandler(library.getArchiveFromUrl.bind(library));
-const api = new DatApi(library, { disablePrompts: true });
+const library = new DatLibrary(db, node);
+const dns = new DatDNS(db);
+const protocolHandler = new DatHandler(dns, node);
+const api = new DatApi(node, dns, library, { disablePrompts: true });
 browser.protocol.registerProtocol('dat', (request) => {
   return protocolHandler.handleRequest(request);
 });
@@ -57,32 +61,13 @@ testWithTimeout('DatArchive API', async (assert) => {
 }, 60000);
 
 testWithTimeout('Dat Network', async (assert) => {
-  const archive = await library.getArchive('sammacbeth.eu');
+  const archive = await api.privateApi.getArchive('dat://sammacbeth.eu');
   assert.ok(!(await archive.getInfo()).isOwner);
   assert.ok((await archive.readdir('/')).includes('index.html'));
 }, 30000);
 
-testWithTimeout('Protocol handler', async (assert) => {
-  const resolveUrl = async (url: string) => {
-    const { pathname, version } = parseUrl(url);
-    const { path } = await protocolHandler.resolvePath(url, pathname, parseInt(version));
-    return path;
-  }
-
-  let testDatAddress = '41f8a987cfeba80a037e51cc8357d513b62514de36f2f9b3d3eeec7a8fb3b5a5'
-  assert.equal(await resolveUrl(`dat://${testDatAddress}+33/`), '/index.html');
-  assert.equal(await resolveUrl(`dat://${testDatAddress}+33/posts`), '/posts/index.html');
-  assert.equal(await resolveUrl(`dat://${testDatAddress}+32/posts`), '/posts.html');
-  try {
-    await resolveUrl(`dat://${testDatAddress}+33/posts.html`)
-    assert.fail('Expected NOT_FOUND error');
-  } catch (e) {
-    assert.equal(e.message, 'NOT_FOUND');
-  }
-}, 60000);
-
 
 test('Dat DNS', async (assert) => {
-  const addr = await library.dns.resolve('dat://sammacbeth.eu');
+  const addr = await dns.resolve('dat://sammacbeth.eu');
   assert.equal(addr, '41f8a987cfeba80a037e51cc8357d513b62514de36f2f9b3d3eeec7a8fb3b5a5');
 })

@@ -13,3 +13,5 @@ mv ./node_modules/hyperdiscovery/package.json ./node_modules/hyperdiscovery/pack
 sed -i.bak "s/require('process-nextick-args')/process.nextTick/g" ./node_modules/hypercore/index.js && rm ./node_modules/hypercore/index.js.bak
 # Replace utp-native with utp-wasm in discovery-swarm
 sed -i.bak "s/require('utp-native')/require('\@sammacbeth\/utp-wasm')/g" ./node_modules/discovery-swarm/index.js && rm ./node_modules/discovery-swarm/index.js.bak
+# Require path.posix in hyperdrive
+sed -i.bak "s/require('path').posix/require('path')/g" ./node_modules/hyperdrive/index.js && rm ./node_modules/hyperdrive/index.js.bak
