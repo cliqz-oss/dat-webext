@@ -1,4 +1,4 @@
-import createDatArchive, { IDatArchive } from '@sammacbeth/dat-archive';
+import createDatArchive, { IDatArchive, create, fork } from '@sammacbeth/dat-archive';
 import Spanan from 'spanan';
 import { DatManifest, SelectArchiveOptions, DatAPI } from './dat';
 import dialog from './dialog';
@@ -44,15 +44,14 @@ class DatApi {
 
     const privateApi = this.privateApi = {
       async create(opts: DatManifest) {
-        // const archive = await library.createArchive(opts);
-        // return archive.url;
-        return '';
+        const archive = await create(node, { persist: true }, opts);
+        return archive.url;
       },
       async fork(url, opts) {
         const addr = await dns.resolve(url);
-        // const archive = await library.forkArchive(addr, opts);
-        // return archive.url;
-        return '';
+        const srcDat = await node.getDat(addr, { persist: true, sparse: true, autoSwarm: true });
+        const archive = await fork(node, srcDat.drive, { persist: true }, opts);
+        return archive.url;
       },
       async dialogResponse(message) {
         dialog.onMessage(message);
@@ -88,7 +87,7 @@ class DatApi {
 
     this.api = {
       resolveName(name: string) {
-        return this.dns.resolve(name);
+        return dns.resolve(name);
       },
       async create(opts: DatManifest = {}) {
         if (disablePrompts) {
@@ -190,7 +189,7 @@ class DatApi {
         return archive.rename(oldPath, newPath, opts);
       },
       async watch(url, pattern) {
-        const addr = await this.dns.resolve(url);
+        const addr = await dns.resolve(url);
         const dat = await node.getDat(addr, { persist: true, sparse: true, autoSwarm: true });
         await dat.ready;
         const archive: any = createDatArchive(dat.drive);

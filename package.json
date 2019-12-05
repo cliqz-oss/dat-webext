@@ -18,10 +18,10 @@
   "dependencies": {
     "@cliqz-oss/dexie": "^2.0.4",
     "@geut/discovery-swarm-webrtc": "^2.2.3",
-    "@sammacbeth/dat-api-v1wrtc": "^0.0.6",
-    "@sammacbeth/dat-archive": "^0.0.6",
+    "@sammacbeth/dat-api-v1wrtc": "^0.0.7",
+    "@sammacbeth/dat-archive": "0.0.9",
     "@sammacbeth/dat-node": "1.0.3",
-    "@sammacbeth/dat-protocol-handler": "0.0.6",
+    "@sammacbeth/dat-protocol-handler": "0.0.7",
     "@sammacbeth/dat-types": "^0.0.6",
     "@sammacbeth/libdweb": "0.0.8",
     "@sammacbeth/utp-wasm": "^1.1.5",
