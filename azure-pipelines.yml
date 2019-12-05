@@ -41,6 +41,12 @@ jobs:
       ff_70:
         firefox_base_url: "https://ftp.mozilla.org/pub/devedition/releases/70.0b4/linux-x86_64/en-GB/"
         firefox_distribution: "firefox-70.0b4.tar.bz2"
+      ff_71:
+        firefox_base_url: "https://ftp.mozilla.org/pub/devedition/releases/71.0b12/linux-x86_64/en-GB/"
+        firefox_distribution: "firefox-71.0b12.tar.bz2"
+      ff_72:
+        firefox_base_url: "https://ftp.mozilla.org/pub/devedition/releases/72.0b2/linux-x86_64/en-GB/"
+        firefox_distribution: "firefox-72.0b2.tar.bz2"
   steps:
   - task: NodeTool@0
     inputs:
