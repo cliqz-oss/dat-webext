@@ -44,6 +44,6 @@ getTab().then(async (tab) => {
   }
 
   seedingButton.addEventListener('change', async (ev) => {
-    library.setSeedingMode(key, 1);
+    library.setSeedingMode(key, seedingButton.checked ? 1 : 0);
   })
 });

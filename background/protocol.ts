@@ -1,117 +1,37 @@
-import * as parseUrl from 'parse-dat-url';
-import * as pda from 'pauls-dat-api';
-import { join as joinPaths } from 'path';
-import * as mime from 'mime';
+import createHandler, { IsADirectoryError, NotFoundError, NetworkTimeoutError } from '@sammacbeth/dat-protocol-handler';
+import mime = require('mime');
+import parseUrl = require('parse-dat-url');
+import { DatAPI } from './dat';
 import { DNSLookupFailed } from './errors';
-import { DatArchive } from './dat';
-
-
-function timeoutWithError(ms, errorCtr) {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      reject(errorCtr());
-    }, ms);
-  })
-}
-
-const ERROR = {
-  ARCHIVE_LOAD_TIMEOUT: 'ARCHIVE_LOAD_TIMEOUT',
-  NOT_FOUND: 'NOT_FOUND',
-  DIRECTORY: 'DIRECTORY',
-  NETWORK_TIMEOUT: 'NETWORK_TIMEOUT',
-}
+import DatDNS from './dns';
 
 class DatHandler {
 
-  getArchiveFromUrl: (url: string, version: number) => Promise<any>
+  handler: (url: string, timeout?: number) => Promise<NodeJS.ReadableStream>;
 
-  constructor(getArchiveFromUrl) {
-    this.getArchiveFromUrl = getArchiveFromUrl;
-  }
-
-  async loadArchive(url: string, version: number, timeout = 30000): Promise<DatArchive> {
-    const loadArchive = this.getArchiveFromUrl(url, version);
-    await Promise.race([
-      loadArchive,
-      timeoutWithError(timeout, () => new Error(ERROR.ARCHIVE_LOAD_TIMEOUT))
-    ]);
-    return loadArchive;
-  }
-
-  async resolvePath(url: string, pathname: string, version: number) {
-    const timeoutAt = Date.now() + 30000;
-    const archive = await this.loadArchive(url, version);
-    const manifest = await pda.readManifest(archive._checkout).catch(_ => ({ }));
-    const root = manifest.web_root || '';
-    const path = decodeURIComponent(pathname);
-    let lastPath;
-
-    async function tryStat(testPath: string) {
-      try {
-        lastPath = testPath;
-        return await archive.stat(testPath, { timeout: timeoutAt - Date.now() });
-      } catch (e) {
-        return false;
-      }
-    }
-
-    let f = await tryStat(joinPaths(root, path));
-    if (f && f.isFile()) {
-      return {
-        archive,
-        path: lastPath,
-      }
-    }
-    if (await tryStat(joinPaths(root, `${path}.html`))) {
-      return {
-        archive,
-        path: lastPath,
-      }
-    }
-    // for directories try to find an index file
-    if (f && f.isDirectory()) {
-      if (await tryStat(joinPaths(root, path, 'index.html'))) {
-        return {
-          archive,
-          path: lastPath,
-        }
-      }
-      if (await tryStat(joinPaths(root, path, 'index.htm'))) {
-        return {
-          archive,
-          path: lastPath,
-        }
-      }
-      // error list directory
-      throw new Error(ERROR.DIRECTORY);
-    }
-
-    if (manifest.fallback_page) {
-      if (await tryStat(joinPaths(root, manifest.fallback_page))) {
-        return {
-          archive,
-          path: lastPath,
-        }
-      }
-    }
-    console.log('not found', root, path, await archive.readdir('/', { recursive: true }))
-    throw new Error(ERROR.NOT_FOUND);
+  constructor(public dns: DatDNS, public node: DatAPI) {
+    this.dns = dns;
+    this.node = node;
+    this.handler = createHandler(this.node, (host) => dns.resolve(host), {
+      persist: true,
+      autoSwarm: true,
+      sparse: true,
+    });
   }
 
   handleRequest(request: browser.protocol.Request): Response {
     const self = this;
-    const { host, pathname, version } = parseUrl(request.url);
+    const { pathname } = parseUrl(request.url);
     const body = new ReadableStream({
       async start(controller) {
         try {
-          const { archive, path } = await self.resolvePath(request.url, pathname, parseInt(version));
-          const stream = archive._checkout.createReadStream(path, { start: 0 });
+          const stream = await self.handler(request.url, 30000);
           let streamComplete;
           let gotFirstChunk = false
           const streamTimeout = new Promise<void>((resolve, reject) => {
             const timeout = setTimeout(() => {
               if (!gotFirstChunk) {
-                return reject(new Error(ERROR.NETWORK_TIMEOUT));
+                return reject(new Error('timeout'));
               }
               return resolve();
             }, 30000);
@@ -138,19 +58,19 @@ class DatHandler {
         } catch (e) {
           if (e instanceof DNSLookupFailed) {
             controller.enqueue(`Dat DNS Lookup failed for ${e.message}`);
-          } else if (e.message === ERROR.ARCHIVE_LOAD_TIMEOUT) {
+          } else if (e instanceof NetworkTimeoutError) {
             controller.enqueue('Unable locate the Dat archive on the network.');
-          } else if (e.message === ERROR.NOT_FOUND) {
+          } else if (e instanceof NotFoundError) {
             controller.enqueue(`Not found: ${e.toString()}`);
-          } else if (e.message === ERROR.DIRECTORY) {
+          } else if (e instanceof IsADirectoryError) {
             const req = await fetch('/pages/directory.html');
             const contents = await req.text();
             controller.enqueue(contents);
-          } else if (e.message === ERROR.NETWORK_TIMEOUT) {
+          } else if (e.message === 'timeout') {
             controller.enqueue('Timed out while loading file from the network')
           } else {
             console.error(e);
-            controller.enqueue(`Unexpected error: ${e.toString()}`);
+            controller.error(`Unexpected error: ${e.toString()}`);
           }
           controller.close();
         }

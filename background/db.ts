@@ -1,5 +1,7 @@
 import Dexie from '@cliqz-oss/dexie';
-import Dat, { DatManifest } from './dat';
+import { DatManifest } from './dat';
+import { IDat } from '@sammacbeth/dat-types/lib/dat';
+import createDatArchive from '@sammacbeth/dat-archive';
 
 export default class Database extends Dexie {
 
@@ -20,7 +22,7 @@ export default class Database extends Dexie {
     this.dnsCache = this.table('dnsCache');
   }
 
-  async updateDat(dat: Dat, seedTime: number) {
+  async updateDat(dat: IDat, seedTime: number) {
     const now = Date.now();
     const key = dat.drive.key.toString('hex');
     const lastUpdate = this.keyCache.get(key);
@@ -48,7 +50,8 @@ export default class Database extends Dexie {
       this.keyCache.set(key, now);
       // update metadata for this dat
       try {
-        const { title, description, type, size } = await dat.archive.getInfo();
+        const archive = createDatArchive(dat.drive);
+        const { title, description, type, size } = await archive.getInfo();
         await this.library.update(key, {
           title, description, type, size
         });
