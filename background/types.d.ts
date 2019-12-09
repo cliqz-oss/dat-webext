@@ -27,3 +27,34 @@ declare namespace browser.protocol {
   }
   function registerProtocol(name: string, handler: (request: Request) => Response): void
 }
+
+declare namespace browser.performance {
+  type MediaMemoryInfo = {
+    audioSize: number
+    videoSize: number
+    resourcesSize: number
+  }
+  type MemoryInfo = {
+    domDom: number
+    domStyle: number
+    domOther: number
+    GCHeapUsage: number
+    media: MediaMemoryInfo
+  }
+  type CategoryDispatch = {
+    category: number
+    count: number
+  }
+  type PerformanceInfo = {
+    host: string
+    pid: number
+    windowId: number
+    duration: number
+    counterId: number
+    isWorker: boolean
+    isTopLevel: boolean
+    memoryInfo: MemoryInfo
+    items: CategoryDispatch[]
+  }
+  function requestPerformanceMetrics(): PerformanceInfo[]
+}

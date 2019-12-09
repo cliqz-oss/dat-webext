@@ -4,6 +4,7 @@ import DatApi from './api';
 import DatDb from './db';
 import nodeFactory from './dat';
 import DatDNS from './dns';
+import Experiment from './experiment';
 
 const node = nodeFactory();
 const db = new DatDb();
@@ -81,3 +82,7 @@ browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     browser.pageAction.hide(tabId);
   }
 });
+
+const experiment = new Experiment(node);
+experiment.start();
+(<any>window).experiment = experiment;

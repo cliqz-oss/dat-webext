@@ -1,0 +1,14 @@
+[
+  {
+    "namespace": "performance",
+    "functions": [
+      {
+        "name": "requestPerformanceMetrics",
+        "type": "function",
+        "description": "",
+        "async": true,
+        "parameters": []
+      }
+    ]
+  }
+]
