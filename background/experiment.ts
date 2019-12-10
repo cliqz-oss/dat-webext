@@ -1,5 +1,6 @@
 import createDatArchive from "@sammacbeth/dat-archive";
 import { DatAPI } from "./dat";
+import { IHyperdrive } from "@sammacbeth/dat-types/lib/hyperdrive";
 
 const publicTestDat = "ee172d7cd9235b2cf86ea9481e8a40e48cea29c743036621edc79a4765aa0281";    
 
@@ -33,6 +34,7 @@ export default class PerformanceExperiment {
         if (!perfLastDay || day !== perfLastDay) {
           this.run().then((result: any) => {
             result.hour = hour;
+            result.version = browser.runtime.getManifest().version;
             console.log('self-test results', result);
             sendAnolysisMessage(result, 'metrics.dat.performance');
             browser.storage.local.set({
@@ -59,7 +61,6 @@ export default class PerformanceExperiment {
     // test loading a dat
     const result: any = await this.runDatTest(publicTestDat, true, 30000);
     const { memory: activeMemory, totalDispatches: activeDispatches } = await this.probePerformance();
-
 
     return {
       duration,
@@ -94,8 +95,10 @@ export default class PerformanceExperiment {
           } catch (e) {}
         }
         if (result.dat) {
-          result.finalVersion = result.dat.drive.version;
+          const drive: IHyperdrive = result.dat.drive;
+          result.finalVersion = drive.version;
         }
+        
         resolve(result);
       }, timeout);
     });
@@ -105,7 +108,7 @@ export default class PerformanceExperiment {
     const start = Date.now();
     const dat = await this.node.getDat(address, {
       persist,
-      sparse: true
+      sparse: true,
     });
     yield {
       loaded: Date.now() - start,
