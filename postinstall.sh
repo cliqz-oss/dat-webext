@@ -15,3 +15,5 @@ sed -i.bak "s/require('process-nextick-args')/process.nextTick/g" ./node_modules
 sed -i.bak "s/require('utp-native')/require('\@sammacbeth\/utp-wasm')/g" ./node_modules/discovery-swarm/index.js && rm ./node_modules/discovery-swarm/index.js.bak
 # Require path.posix in hyperdrive
 sed -i.bak "s/require('path').posix/require('path')/g" ./node_modules/hyperdrive/index.js && rm ./node_modules/hyperdrive/index.js.bak
+# Reduce dns cache clean interval
+sed -i.bak "s/options.interval/300/g" ./node_modules/dat-dns/cache.js && rm ./node_modules/dat-dns/cache.js.bak
