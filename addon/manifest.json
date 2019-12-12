@@ -17,7 +17,8 @@
         "unlimitedStorage",
         "tabs",
         "<all_urls>",
-        "dns"
+        "dns",
+        "alarms"
     ],
     "experiment_apis": {
         "protocol": {
@@ -110,6 +111,14 @@
                     ]
                 ],
                 "script": "libdweb/toolkit/components/extensions/child/ext-udp.js"
+            }
+        },
+        "performance": {
+            "schema": "performance/schema.json",
+            "child": {
+                "scopes": ["addon_child"],
+                "paths":[["performance"]],
+                "script": "performance/performance.js"
             }
         }
     },
