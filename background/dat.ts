@@ -2,32 +2,55 @@ import apiFactory, { DatV1API } from '@sammacbeth/dat-api-v1wrtc';
 import RandomAccess = require('random-access-idb-mutable-file');
 
 export interface DatManifest {
-  title?: string
-  description?: string
-  type?: string[]
+  title?: string;
+  description?: string;
+  type?: string[];
 }
 
 export interface SelectArchiveOptions {
-  title?: string
-  buttonLabel?: string
+  title?: string;
+  buttonLabel?: string;
   filters?: {
-    isOwner: boolean
-    type?: string | string[]
-  }
+    isOwner: boolean;
+    type?: string | string[];
+  };
 }
 
 export type DatAPI = DatV1API;
+
+const storeName = 'IDBMutableFile';
+const mountStorage = RandomAccess.mount({
+  name: 'dat1data',
+  storeName,
+});
+
 export default () => {
   return apiFactory({
-    persistantStorageFactory: (key) => RandomAccess.mount({
-      name: key,
-      storeName: 'data',
-    }),
-    persistantStorageDeleter: (key) => {
+    persistantStorageFactory: async (key) => {
+      const storage = await mountStorage;
+      return (name) => storage(`${key}/${name}`);
+    },
+    persistantStorageDeleter: async (key) => {
+      const storage = await mountStorage;
+      const tmpVol = storage('tmp');
+      const db: IDBDatabase = tmpVol.volume.db;
+      const transaction = db.transaction(storeName, 'readonly');
+      const store = transaction.objectStore(storeName);
+      const req = store.getAllKeys();
       return new Promise((resolve, reject) => {
-        const request = window.indexedDB.deleteDatabase(key);
-        request.onsuccess = () => resolve();
-        request.onerror = (err) => reject(err);
+        req.onsuccess = async () => {
+          const keys = req.result;
+          const deletions = keys
+            .filter((k: string) => k.startsWith(`/${key}`))
+            .map((k) => {
+              tmpVol.volume.delete(k);
+            });
+          await Promise.all(deletions);
+          resolve();
+        };
+        req.onerror = (err) => {
+          reject(err);
+        };
       });
     },
   });
