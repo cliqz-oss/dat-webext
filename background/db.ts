@@ -23,6 +23,7 @@ export default class Database extends Dexie {
   }
 
   async updateDat(dat: IDat, seedTime: number) {
+    await dat.ready;
     const now = Date.now();
     const key = dat.drive.key.toString('hex');
     const lastUpdate = this.keyCache.get(key);
