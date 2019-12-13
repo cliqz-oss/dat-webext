@@ -25,7 +25,10 @@ const mountStorage = RandomAccess.mount({
 });
 
 export default () => {
-  return apiFactory({
+  const api = apiFactory({
+    hyperdiscoveryOpts: {
+      autoListen: false
+    },
     persistantStorageFactory: async (key) => {
       const storage = await mountStorage;
       return (name) => storage(`${key}/${name}`);
@@ -54,4 +57,7 @@ export default () => {
       });
     },
   });
+  // work around to make hyperdiscovery bind a random port
+  (<any> api.loader.swarm).disc._port = undefined;
+  return api;
 };
