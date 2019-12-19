@@ -23,7 +23,11 @@ const testWithTimeout = (name: string, testFn: (assert: browser.test.Assert) => 
 // we have to register the protocol so the URL implementation
 // recognises dat:// as a protocol.
 
-const node = nodeFactory();
+const node = nodeFactory({
+  announceEnabled: true,
+  wrtcEnabled: true,
+  uploadEnabled: true,
+});
 const db = new DatDb();
 const library = new DatLibrary(db, node);
 const dns = new DatDNS(db);
