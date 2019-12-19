@@ -71,8 +71,7 @@ function createLoader(config: Config) {
   });
 }
 
-export default () => {
-  let config = DEFAULT_CONFIG;
+export default (config: Config = DEFAULT_CONFIG) => {
   const api = new HyperdriveAPI(createLoader(config), {
     persist: true,
     announce: config.announceEnabled,
