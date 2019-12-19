@@ -1,0 +1,13 @@
+diff --git a/node_modules/discovery-swarm/index.js b/node_modules/discovery-swarm/index.js
+index 8ebea85..9d6fb65 100644
+--- a/node_modules/discovery-swarm/index.js
++++ b/node_modules/discovery-swarm/index.js
+@@ -10,7 +10,7 @@ var connections = require('connections')
+ var debug = require('debug')('discovery-swarm')
+ 
+ try {
+-  var utp = require('utp-native')
++  var utp = require('@sammacbeth/utp-wasm')
+ } catch (err) {
+   // do nothing
+ }
