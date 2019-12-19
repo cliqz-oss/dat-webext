@@ -93,6 +93,7 @@ export default (config: Config = DEFAULT_CONFIG) => {
       config.uploadEnabled !== newConfig.uploadEnabled
     ) {
       api.loader = createLoader(newConfig);
+      (<any>api.loader.swarm).disc._port = undefined;
     }
     config = newConfig;
     // reload open dats
