@@ -1,0 +1,13 @@
+diff --git a/node_modules/@sammacbeth/tape-ext/src/tape-ext.js b/node_modules/@sammacbeth/tape-ext/src/tape-ext.js
+index 8b7544d..3179799 100755
+--- a/node_modules/@sammacbeth/tape-ext/src/tape-ext.js
++++ b/node_modules/@sammacbeth/tape-ext/src/tape-ext.js
+@@ -153,7 +153,7 @@ const work = async () => {
+           id = await driver.execute(command)
+           setTimeout(() => {
+             driver.get('dat://dat-archive-test.hashbase.io');
+-          }, 1000);
++          }, 5000);
+           break
+         }
+       }

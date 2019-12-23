@@ -131,7 +131,6 @@ const onMessage = ({ data }) => {
     WEB_API_URL = data.url;
     DocumentManager.init();
   } else if (data.action === 'shutdown') {
-    console.log('[process-script] got shutdown');
     DocumentManager.uninit();
     removeMessageListener(`process-${processId}`, onMessage);
   } else {

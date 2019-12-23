@@ -1,6 +1,7 @@
 import createDatArchive from "@sammacbeth/dat-archive";
 import { DatAPI } from "./dat";
 import { IHyperdrive } from "@sammacbeth/dat-types/lib/hyperdrive";
+import { getConfig } from "./config";
 
 const publicTestDat = "ee172d7cd9235b2cf86ea9481e8a40e48cea29c743036621edc79a4765aa0281";    
 
@@ -32,9 +33,13 @@ export default class PerformanceExperiment {
         const [day, hour] = [t.getDate(), t.getHours()];
         const { perfLastDay } = await browser.storage.local.get(['perfLastDay']);
         if (!perfLastDay || day !== perfLastDay) {
+          const config = await getConfig();
           this.run().then((result: any) => {
             result.hour = hour;
             result.version = browser.runtime.getManifest().version;
+            result.announceEnabled = config.announceEnabled;
+            result.uploadEnabled = config.uploadEnabled;
+            result.wrtcEnabled = config.wrtcEnabled;
             console.log('self-test results', result);
             sendAnolysisMessage(result, 'metrics.dat.performance');
             browser.storage.local.set({

@@ -86,14 +86,6 @@ setInterval(async () => {
   }
 }, 60000);
 
-browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (tab.url && tab.url.startsWith('dat://')) {
-    browser.pageAction.show(tabId);
-  } else {
-    browser.pageAction.hide(tabId);
-  }
-});
-
 const experiment = new Experiment(node);
 experiment.start();
 win.experiment = experiment;
