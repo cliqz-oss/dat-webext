@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.1] - 2019-12-23
+
+ * Add a settings page
+ * Remove page action
+ * Compatability mode for when indexeddb is disabled/broken.
+
+## [0.1.0] - 2019-12-19
+
+ * Use a single indexedDB for all dats. This improves initial load times and declutters
+ the storage space.
+ * Added a performance probe to measure connectivity across different network environments.
+ * Make swarm settings configurable, and default to no-announce and no upload.
+
 ## [0.0.16] - 2019-12-09
 
  * Large refactor to move most dat logic to [sams-dat-api](https://github.com/sammacbeth/sams-dat-api).
@@ -30,6 +43,8 @@
  * Update libdweb dependency: TCPSocket in parent process
  * Bump various dependencies.
 
+[0.1.1]: https://github.com/cliqz-oss/dat-webext/compare/v0.1.0...v0.1.1
+[0.1.0]: https://github.com/cliqz-oss/dat-webext/compare/v0.0.16...v0.1.0
 [0.0.16]: https://github.com/cliqz-oss/dat-webext/compare/v0.0.15...v0.0.16
 [0.0.15]: https://github.com/cliqz-oss/dat-webext/compare/v0.0.14...v0.0.15
 [0.0.14]: https://github.com/cliqz-oss/dat-webext/compare/v0.0.13...v0.0.14
