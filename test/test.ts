@@ -24,7 +24,7 @@ const testWithTimeout = (name: string, testFn: (assert: browser.test.Assert) => 
 // recognises dat:// as a protocol.
 
 const node = nodeFactory({
-  announceEnabled: true,
+  announceEnabled: false,
   wrtcEnabled: true,
   uploadEnabled: true,
 });
