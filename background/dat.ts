@@ -2,6 +2,7 @@ import { DatV1API, DatV1WebRTCLoader } from '@sammacbeth/dat-api-v1wrtc';
 import { DatV1Loader } from '@sammacbeth/dat-api-v1';
 import HyperdriveAPI, { DatLoaderBase, StorageOpts } from '@sammacbeth/dat-api-core/';
 import RandomAccess = require('random-access-idb-mutable-file');
+import ram = require('random-access-memory');
 import { Config, getConfig, onConfigChanged, DEFAULT_CONFIG } from './config';
 
 export interface DatManifest {
@@ -28,8 +29,13 @@ const mountStorage = RandomAccess.mount({
 });
 
 async function persistantStorageFactory(key) {
-  const storage = await mountStorage;
-  return (name: string) => storage(`${key}/${name}`);
+  try {
+    const storage = await mountStorage;
+    return (name: string) => storage(`${key}/${name}`);
+  } catch (e) {
+    console.warn('indexeddb mount failed, falling back to non-persistent storage', e);
+    return ram;
+  }
 }
 
 async function persistantStorageDeleter(key) {
