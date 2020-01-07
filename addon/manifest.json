@@ -129,6 +129,7 @@
         }
     },
     "options_ui": {
-        "page": "pages/settings.html"
+        "page": "pages/settings.html",
+        "browser_style": true
     }
 }

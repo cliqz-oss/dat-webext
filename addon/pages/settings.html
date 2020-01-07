@@ -5,26 +5,36 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Dat extension settings</title>
-    <link rel="stylesheet" href="../assets/bulma.css" />
+    <link rel="stylesheet" href="./style.css"/>
   </head>
   <body>
-    <section class="section">
-      <div class="container">
-        <form>
-          <h3 class="title">Dat protocol settings</h3>
-          <div class="field">
-            <label class="checkbox">
-              <input type="checkbox" id="setting-announce" />
-              Announce my IP to the network
-            </label>
-          </div>
-          <div class="field">
-            <label class="checkbox">
-              <input type="checkbox" id="setting-upload" />
-              Upload data to other peers
-            </label>
-          </div>
-        </form>
+    <section class="section browser-style">
+      <div class="">
+        <h2>Dat protocol settings</h2>
+        <p class="text">
+          The Dat Protocol enables the loading of certain pages via a peer-to-peer network.
+          The following settings control your browser's participation in this network.
+        </p>
+        <div class="browser-style">
+          <input type="checkbox" id="setting-announce" />
+          <label for="setting-announce">
+            Announce my IP to the network. 
+          </label>
+          <p>
+            Enabling this setting will mean that your IP address will be sent
+            to the network to enable other devices to connect to you and share the contents of Dat sites you visit.
+          </p>
+        </div>
+        <div class="browser-style">
+          <input type="checkbox" id="setting-upload" />
+          <label for="setting-upload">
+            Upload data to other peers.
+          </label>
+          <p>
+            Enabling this setting will mean your device will share the content of Dat sites
+            you visit with other peers in the network.
+          </p>
+        </div>
       </div>
     </section>
   </body>
