@@ -37,3 +37,10 @@ checkbox.upload.addEventListener('change', async () => {
     }
   });
 });
+
+const i18Attr = 'data-i18n-id';
+document.querySelectorAll(`[${i18Attr}]`).forEach((elem) => {
+  const key = elem.getAttribute(i18Attr);
+  const text = browser.i18n.getMessage(key);  
+  elem.textContent = text;
+});
