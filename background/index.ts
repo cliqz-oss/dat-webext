@@ -31,6 +31,23 @@ browser.protocol.registerProtocol('dat', (request) => {
   return protocolHandler.handleRequest(request);
 });
 
+// Handler for messages from other contexts
+browser.runtime.onMessage.addListener((message, sender) => {
+  try {
+    const { action, args } = message;
+    if (action === 'getConfig' && sender.id == 'dat@cliqz.com') {
+      return getConfig();
+    } else if (action === 'setConfig' && sender.id == 'dat@cliqz.com') {
+      return setConfig(args[0]);
+    }
+    return {
+      error: 'Unknown message action',
+    };
+  } catch (e) {
+    return;
+  }
+});
+
 const api = new DatApi(node, dns, library);
 win.api = api;
 

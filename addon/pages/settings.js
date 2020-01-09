@@ -1,10 +1,15 @@
+async function getConfig() {
+  return browser.runtime.sendMessage({ action: 'getConfig' });
+}
 
-const { getConfig, setConfig } = browser.extension.getBackgroundPage();
+async function setConfig(conf) {
+  browser.runtime.sendMessage({ action: 'setConfig', args: [conf] });
+}
 
 const checkbox = {
   announce: document.getElementById('setting-announce'),
   upload: document.getElementById('setting-upload'),
-}
+};
 let lock = Promise.resolve();
 
 getConfig().then((conf) => {
@@ -33,3 +38,9 @@ checkbox.upload.addEventListener('change', async () => {
   });
 });
 
+const i18Attr = 'data-i18n-id';
+document.querySelectorAll(`[${i18Attr}]`).forEach((elem) => {
+  const key = elem.getAttribute(i18Attr);
+  const text = browser.i18n.getMessage(key);  
+  elem.textContent = text;
+});

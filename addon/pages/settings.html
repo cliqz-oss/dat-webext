@@ -4,27 +4,24 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Create Dat</title>
-    <link rel="stylesheet" href="../assets/bulma.css" />
+    <title>Dat extension settings</title>
+    <link rel="stylesheet" href="./style.css"/>
   </head>
   <body>
-    <section class="section">
-      <div class="container">
-        <form>
-          <h3 class="title">Dat protocol settings</h3>
-          <div class="field">
-            <label class="checkbox">
-              <input type="checkbox" id="setting-announce" />
-              Announce my IP to the network
-            </label>
-          </div>
-          <div class="field">
-            <label class="checkbox">
-              <input type="checkbox" id="setting-upload" />
-              Upload data to other peers
-            </label>
-          </div>
-        </form>
+    <section class="section browser-style">
+      <div class="">
+        <h2 data-i18n-id="settings_title"></h2>
+        <p class="text" data-i18n-id="settings_description"></p>
+        <div class="browser-style">
+          <input type="checkbox" id="setting-announce" />
+          <label for="setting-announce" data-i18n-id="setting_announce_title"></label>
+          <p data-i18n-id="setting_announce_desc"></p>
+        </div>
+        <div class="browser-style">
+          <input type="checkbox" id="setting-upload" />
+          <label for="setting-upload" data-i18n-id="setting_upload_title"></label>
+          <p data-i18n-id="setting_upload_desc"></p>
+        </div>
       </div>
     </section>
   </body>

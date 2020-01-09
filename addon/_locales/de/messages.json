@@ -1,0 +1,20 @@
+{
+  "settings_title": {
+    "message": "Dat-Protokoll Einstellungen"
+  },
+  "settings_description": {
+    "message": "Das Dat-Protokoll erlaubt das Laden von bestimmten Seiten über ein peer-to-peer Netzwerk. Die folgenden Einstellungen kontrollieren, wie dein Browser an diesem Netzwerk teilnimmt."
+  },
+  "setting_announce_title": {
+    "message": "Meine IP-Adresse dem Netzwerk bekannt geben."
+  },
+  "setting_announce_desc": {
+    "message": "Wenn diese Einstellung aktiviert ist wird deine IP-Adresse an das Netzwerk gesendet um anderen Peers zu erlauben, sich mit dir zu verbinden und die Inhalte von Dat-Seiten, die du besuchst, zu teilen."
+  },
+  "setting_upload_title": {
+    "message": "Daten mit anderen Peers teilen."
+  },
+  "setting_upload_desc": {
+    "message": "Wenn diese Einstellung aktiviert ist wird dein Browser den Inhalt von Dat-Seiten, die du besuchst, mit anderen Peers im Netzwerk teilen."
+  }
+}

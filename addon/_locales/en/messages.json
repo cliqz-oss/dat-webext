@@ -1,0 +1,20 @@
+{
+  "settings_title": {
+    "message": "Dat protocol settings"
+  },
+  "settings_description": {
+    "message": "The Dat Protocol enables the loading of certain pages via a peer-to-peer network. The following settings control your browser's participation in this network."
+  },
+  "setting_announce_title": {
+    "message": "Announce my IP to the network."
+  },
+  "setting_announce_desc": {
+    "message": "Enabling this setting will mean that your IP address will be sent to the network to enable other peers to connect to you and share the content of Dat sites you visit."
+  },
+  "setting_upload_title": {
+    "message": "Upload data to other peers."
+  },
+  "setting_upload_desc": {
+    "message": "Enabling this setting will mean your browser will share the content of Dat sites you visit with other peers in the network."
+  }
+}
