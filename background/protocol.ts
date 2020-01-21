@@ -1,4 +1,8 @@
-import createHandler, { IsADirectoryError, NotFoundError, NetworkTimeoutError } from '@sammacbeth/dat-protocol-handler';
+import createHandler, {
+  IsADirectoryError,
+  NotFoundError,
+  NetworkTimeoutError,
+} from '@sammacbeth/dat-protocol-handler';
 import mime = require('mime');
 import parseUrl = require('parse-dat-url');
 import eos = require('end-of-stream');
@@ -7,7 +11,6 @@ import { DNSLookupFailed } from './errors';
 import DatDNS from './dns';
 
 class DatHandler {
-
   handler: (url: string, timeout?: number) => Promise<NodeJS.ReadableStream>;
 
   constructor(public dns: DatDNS, public node: DatAPI) {
@@ -19,12 +22,13 @@ class DatHandler {
   handleRequest(request: browser.protocol.Request): Response {
     const self = this;
     const { pathname } = parseUrl(request.url);
+    let cancelled = false;
     const body = new ReadableStream({
       async start(controller) {
         try {
           const stream = await self.handler(request.url, 30000);
           let streamComplete, streamError;
-          let gotFirstChunk = false
+          let gotFirstChunk = false;
           const streamTimeout = new Promise<void>((resolve, reject) => {
             const timeout = setTimeout(() => {
               if (!gotFirstChunk) {
@@ -39,20 +43,24 @@ class DatHandler {
             streamError = (err) => {
               clearTimeout(timeout);
               reject(err);
-            }
+            };
           });
           eos(stream, (err) => {
             if (err) {
               controller.error(err);
               streamError(err);
             } else {
-              controller.close();
+              if (!cancelled) {
+                controller.close();
+              }
               streamComplete();
             }
           });
           stream.on('data', (chunk) => {
             gotFirstChunk = true;
-            controller.enqueue(chunk);
+            if (!cancelled) {
+              controller.enqueue(chunk);
+            }
           });
           await streamTimeout;
         } catch (e) {
@@ -67,19 +75,22 @@ class DatHandler {
             const contents = await req.text();
             controller.enqueue(contents);
           } else if (e.message === 'timeout') {
-            controller.enqueue('Timed out while loading file from the network')
+            controller.enqueue('Timed out while loading file from the network');
           } else {
             console.error(e);
             controller.error(`Unexpected error: ${e.toString()}`);
           }
           controller.close();
         }
-      }
+      },
+      cancel() {
+        cancelled = true;
+      },
     });
     return new Response(body, {
       headers: {
-        "content-type": mime.getType(decodeURIComponent(pathname)) || 'text/html'
-      }
+        'content-type': mime.getType(decodeURIComponent(pathname)) || 'text/html',
+      },
     });
   }
 }
