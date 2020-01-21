@@ -1,6 +1,6 @@
 import { DatV1API, DatV1WebRTCLoader } from '@sammacbeth/dat-api-v1wrtc';
 import { DatV1Loader } from '@sammacbeth/dat-api-v1';
-import HyperdriveAPI, { DatLoaderBase, StorageOpts } from '@sammacbeth/dat-api-core/';
+import HyperdriveAPI from '@sammacbeth/dat-api-core/';
 import RandomAccess = require('random-access-idb-mutable-file');
 import ram = require('random-access-memory');
 import { Config, getConfig, onConfigChanged, DEFAULT_CONFIG } from './config';
@@ -80,7 +80,13 @@ function createLoader(config: Config) {
 export default (config: Config = DEFAULT_CONFIG) => {
   const api = new HyperdriveAPI(createLoader(config), {
     persist: true,
-    announce: config.announceEnabled,
+    autoSwarm: true,
+    driveOptions: {
+      sparse: true,
+    },
+    swarmOptions: {
+      announce: config.announceEnabled,
+    },
   });
   // work around to make hyperdiscovery bind a random port
   (<any>api.loader.swarm).disc._port = undefined;

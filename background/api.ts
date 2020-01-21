@@ -49,7 +49,7 @@ class DatApi {
       },
       async fork(url, opts) {
         const addr = await dns.resolve(url);
-        const srcDat = await node.getDat(addr, { persist: true, sparse: true, autoSwarm: true });
+        const srcDat = await node.getDat(addr);
         const archive = await fork(node, srcDat.drive, { persist: true }, opts);
         return archive.url;
       },
@@ -58,7 +58,7 @@ class DatApi {
       },
       async getArchive(url): Promise<IDatArchive> {
         const addr = await dns.resolve(url);
-        const dat = await node.getDat(addr, { persist: true, sparse: true, autoSwarm: true });
+        const dat = await node.getDat(addr);
         await dat.ready;
         return createDatArchive(dat.drive);
       },
@@ -190,7 +190,7 @@ class DatApi {
       },
       async watch(url, pattern) {
         const addr = await dns.resolve(url);
-        const dat = await node.getDat(addr, { persist: true, sparse: true, autoSwarm: true });
+        const dat = await node.getDat(addr);
         await dat.ready;
         const archive: any = createDatArchive(dat.drive);
         const key = dat.drive.key.toString('hex');

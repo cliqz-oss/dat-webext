@@ -12,11 +12,7 @@ class DatHandler {
   constructor(public dns: DatDNS, public node: DatAPI) {
     this.dns = dns;
     this.node = node;
-    this.handler = createHandler(this.node, (host) => dns.resolve(host), {
-      persist: true,
-      autoSwarm: true,
-      sparse: true,
-    });
+    this.handler = createHandler(this.node, (host) => dns.resolve(host));
   }
 
   handleRequest(request: browser.protocol.Request): Response {
