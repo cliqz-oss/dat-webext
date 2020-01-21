@@ -113,7 +113,6 @@ export default class PerformanceExperiment {
     const start = Date.now();
     const dat = await this.node.getDat(address, {
       persist,
-      sparse: true,
     });
     yield {
       loaded: Date.now() - start,
