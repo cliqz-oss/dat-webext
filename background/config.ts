@@ -17,7 +17,7 @@ export interface Config {
 
 export const DEFAULT_CONFIG: Config = {
   announceEnabled: false,
-  wrtcEnabled: isMobile,
+  wrtcEnabled: true,
   uploadEnabled: false,
 };
 
