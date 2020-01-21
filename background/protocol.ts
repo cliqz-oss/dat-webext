@@ -1,6 +1,7 @@
 import createHandler, { IsADirectoryError, NotFoundError, NetworkTimeoutError } from '@sammacbeth/dat-protocol-handler';
 import mime = require('mime');
 import parseUrl = require('parse-dat-url');
+import eos = require('end-of-stream');
 import { DatAPI } from './dat';
 import { DNSLookupFailed } from './errors';
 import DatDNS from './dns';
@@ -22,7 +23,7 @@ class DatHandler {
       async start(controller) {
         try {
           const stream = await self.handler(request.url, 30000);
-          let streamComplete;
+          let streamComplete, streamError;
           let gotFirstChunk = false
           const streamTimeout = new Promise<void>((resolve, reject) => {
             const timeout = setTimeout(() => {
@@ -35,16 +36,19 @@ class DatHandler {
               clearTimeout(timeout);
               resolve();
             };
-          })
-          stream.on('close', () => {
-            controller.close();
+            streamError = (err) => {
+              clearTimeout(timeout);
+              reject(err);
+            }
           });
-          stream.on('end', () => {
-            controller.close();
-            streamComplete();
-          });
-          stream.on('error', (e) => {
-            controller.error(e);
+          eos(stream, (err) => {
+            if (err) {
+              controller.error(err);
+              streamError(err);
+            } else {
+              controller.close();
+              streamComplete();
+            }
           });
           stream.on('data', (chunk) => {
             gotFirstChunk = true;
