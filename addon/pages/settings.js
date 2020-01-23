@@ -20,20 +20,16 @@ getConfig().then((conf) => {
 checkbox.announce.addEventListener('change', async () => {
   await lock;
   lock = getConfig().then((conf) => {
-    if (checkbox.announce.checked !== conf.announceEnabled) {
-      conf.announceEnabled = !!checkbox.announce.checked;
-      return setConfig(conf);
-    }
+    conf.announceEnabled = !!checkbox.announce.checked;
+    return setConfig(conf);
   });
 });
 
 checkbox.upload.addEventListener('change', async () => {
   await lock;
   lock = getConfig().then((conf) => {
-    if (checkbox.upload.checked !== conf.uploadEnabled) {
-      conf.uploadEnabled = !!checkbox.announce.checked;
-      return setConfig(conf);
-    }
+    conf.uploadEnabled = !!checkbox.upload.checked;
+    return setConfig(conf);
   });
 });
 
