@@ -4,6 +4,7 @@ import HyperdriveAPI from '@sammacbeth/dat-api-core/';
 import RandomAccess = require('random-access-idb-mutable-file');
 import ram = require('random-access-memory');
 import { Config, getConfig, onConfigChanged, DEFAULT_CONFIG } from './config';
+import simplePeer = require('./webrtc-config.json');
 
 export interface DatManifest {
   title?: string;
@@ -66,6 +67,10 @@ function createLoader(config: Config) {
   if (config.wrtcEnabled) {
     return new DatV1WebRTCLoader({
       hyperdiscoveryOpts: { autoListen: false, upload: config.uploadEnabled },
+      wrtcOpts: {
+        bootstrap: ["https://dat-signal.test.cliqz.com/"],
+        simplePeer,
+      },
       persistantStorageDeleter,
       persistantStorageFactory,
     });
