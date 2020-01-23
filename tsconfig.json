@@ -3,6 +3,7 @@
       "target": "es6",
       "module": "commonjs",
       "sourceMap": true,
-      "typeRoots": ["node_modules/@types", "node_modules/web-ext-types"]
+      "typeRoots": ["node_modules/@types", "node_modules/web-ext-types"],
+      "resolveJsonModule": true
     }
 }

@@ -11,6 +11,14 @@ node('docker') {
     }
 
     img.inside() {
+        stage('Load WebRTC config') {
+            withCredentials([
+                file(credentialsId: 'crdtnls', variable: 'WEBRTC_CONFIG')
+            ]) {
+                sh 'cp $WEBRTC_CONFIG background/webrtc-config.json'
+            }
+        }
+
         stage('Build') {
             sh 'rm -rf ./web-ext-artifacts'
             sh 'cp -r /app/node_modules ./'
