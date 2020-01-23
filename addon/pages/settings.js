@@ -32,7 +32,6 @@ checkbox.upload.addEventListener('change', async () => {
   lock = getConfig().then((conf) => {
     if (checkbox.upload.checked !== conf.uploadEnabled) {
       conf.uploadEnabled = !!checkbox.announce.checked;
-      conf.wrtcEnabled = conf.uploadEnabled;
       return setConfig(conf);
     }
   });

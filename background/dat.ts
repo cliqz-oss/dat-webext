@@ -66,6 +66,9 @@ function createLoader(config: Config) {
   if (config.wrtcEnabled) {
     return new DatV1WebRTCLoader({
       hyperdiscoveryOpts: { autoListen: false, upload: config.uploadEnabled },
+      wrtcOpts: {
+        bootstrap: ["https://dat-signal.test.cliqz.com/"],
+      },
       persistantStorageDeleter,
       persistantStorageFactory,
     });
