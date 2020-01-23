@@ -1,4 +1,4 @@
-FROM node:10.16.0-stretch
+FROM node:12.13.0-stretch
 
 ARG DEBIAN_FRONTEND=noninteractive
 # python dependencies for balrog submitter
