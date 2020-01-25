@@ -8,7 +8,7 @@
     "build": "npm run build:background && npm run build:webapi",
     "build:background": "browserify -r fs:graceful-fs -e background/index.ts -p tsify -g @sammacbeth/libdwebify > addon/background.js",
     "build:webapi": "browserify -e ./web-api/web-api.js > addon/web-api.js",
-    "start": "cross-env MOZ_DISABLE_CONTENT_SANDBOX=1 web-ext run -s addon --firefox=firefoxdeveloperedition --no-reload -u about:debugging",
+    "start": "cross-env MOZ_DISABLE_CONTENT_SANDBOX=1 web-ext run -s addon --firefox=firefoxdeveloperedition --no-reload -u about:debugging --pref extensions.experiments.enabled=true",
     "postinstall": "patch-package && bash ./postinstall.sh",
     "package": "web-ext build -s ./addon/",
     "version": "node update_version.js && git add addon/manifest.json"
