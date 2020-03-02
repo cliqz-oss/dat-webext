@@ -44,7 +44,7 @@
     "patch-package": "^6.2.1",
     "tsify": "^4.0.1",
     "typescript": "^3.7.3",
-    "web-ext": "^4.0.0",
+    "web-ext": "^4.1.0",
     "web-ext-types": "^3.2.1"
   }
 }
