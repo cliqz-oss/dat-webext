@@ -17,6 +17,7 @@ export default class DatDNS {
       persistentCache: this,
       dnsHost: 'cloudflare-dns.com',
       dnsPath: '/dns-query',
+      cacheCleanSeconds: 300,
     });
   }
 
