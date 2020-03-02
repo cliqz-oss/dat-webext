@@ -22,6 +22,7 @@ jobs:
       artifactName: extension
 
 - job: Test
+  timeoutInMinutes: 5
   pool:
     vmImage: 'ubuntu-latest'
   strategy:
