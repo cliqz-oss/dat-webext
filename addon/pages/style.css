@@ -20,6 +20,13 @@ body * {
   text-align: start;
 }
 
+@media (prefers-color-scheme: dark) {
+  body {
+    color: rgb(249, 249, 250);
+    background-color: #2A2A2E;
+  }
+}
+
 .browser-style {
   -moz-appearance: none;
   margin-bottom: 6px;
