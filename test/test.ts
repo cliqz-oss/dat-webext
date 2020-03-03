@@ -65,7 +65,7 @@ testWithTimeout('DatArchive API', async (assert) => {
 }, 60000);
 
 testWithTimeout('Dat Network', async (assert) => {
-  const archive = await api.privateApi.getArchive('dat://sammacbeth.eu');
+  const archive = await api.privateApi.getArchive('dat://dat.foundation');
   assert.ok(!(await archive.getInfo()).isOwner);
   assert.ok((await archive.readdir('/')).includes('index.html'));
 }, 30000);
