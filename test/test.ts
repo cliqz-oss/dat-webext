@@ -62,7 +62,7 @@ testWithTimeout('DatArchive API', async (assert) => {
   pendingEvents = [];
   await datArchiveTestListener;
   pendingEvents.forEach(parseTestEvent);
-}, 60000);
+}, 120000);
 
 testWithTimeout('Dat Network', async (assert) => {
   const archive = await api.privateApi.getArchive('dat://dat.foundation');
