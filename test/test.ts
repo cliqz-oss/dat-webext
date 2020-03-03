@@ -62,10 +62,10 @@ testWithTimeout('DatArchive API', async (assert) => {
   pendingEvents = [];
   await datArchiveTestListener;
   pendingEvents.forEach(parseTestEvent);
-}, 60000);
+}, 120000);
 
 testWithTimeout('Dat Network', async (assert) => {
-  const archive = await api.privateApi.getArchive('dat://sammacbeth.eu');
+  const archive = await api.privateApi.getArchive('dat://dat.foundation');
   assert.ok(!(await archive.getInfo()).isOwner);
   assert.ok((await archive.readdir('/')).includes('index.html'));
 }, 30000);
