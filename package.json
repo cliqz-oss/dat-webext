@@ -40,7 +40,7 @@
     "@sammacbeth/tape-ext": "0.5.1",
     "@types/node": "^13.7.7",
     "browserify": "^16.5.0",
-    "cross-env": "^7.0.0",
+    "cross-env": "^7.0.1",
     "patch-package": "^6.2.1",
     "tsify": "^4.0.1",
     "typescript": "^3.8.3",
