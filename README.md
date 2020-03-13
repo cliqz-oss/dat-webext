@@ -20,6 +20,7 @@ npm run start
 
 or, run in an existing firefox profile:
  * Disable the content sandbox (required for experimental APIs): In `about:config`, set the `security.sandbox.content.level` pref to `2`.
+ * Enable the `extensions.experiments.enabled` preference in `about:config`
  * Go to `about:debugging`
  * Select 'Load Temporary Add-on', and select `addon/manifest.json` from this repository.
 
