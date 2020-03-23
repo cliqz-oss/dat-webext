@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.1.5] - 2020-03-03
+
+ * Add dark mode settings styling.
+
+## [0.1.4] - 2020-01-23
+
+ * Fixes to settings page
+
+## [0.1.3] - 2020-01-21
+
+ * Updated dependencies
+
+## [0.1.2] - 2020-01-09
+
+ * Settings page matches browser style.
+ * Add German localisation for settings.
+
 ## [0.1.1] - 2019-12-23
 
  * Add a settings page
@@ -43,6 +60,10 @@
  * Update libdweb dependency: TCPSocket in parent process
  * Bump various dependencies.
 
+[0.1.5]: https://github.com/cliqz-oss/dat-webext/compare/v0.1.4...v0.1.5
+[0.1.4]: https://github.com/cliqz-oss/dat-webext/compare/v0.1.3...v0.1.4
+[0.1.3]: https://github.com/cliqz-oss/dat-webext/compare/v0.1.2...v0.1.3
+[0.1.2]: https://github.com/cliqz-oss/dat-webext/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/cliqz-oss/dat-webext/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/cliqz-oss/dat-webext/compare/v0.0.16...v0.1.0
 [0.0.16]: https://github.com/cliqz-oss/dat-webext/compare/v0.0.15...v0.0.16
