@@ -38,7 +38,7 @@
   "devDependencies": {
     "@sammacbeth/libdwebify": "^1.0.0",
     "@sammacbeth/tape-ext": "0.5.1",
-    "@types/node": "^13.7.7",
+    "@types/node": "^13.11.0",
     "browserify": "^16.5.0",
     "cross-env": "^7.0.0",
     "patch-package": "^6.2.1",
