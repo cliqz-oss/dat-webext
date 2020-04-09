@@ -29,13 +29,16 @@ jobs:
     matrix:
       ff_nightly:
         firefox_base_url: "https://ftp.mozilla.org/pub/firefox/nightly/latest-mozilla-central/"
-        firefox_distribution: "firefox-75.0a1.en-US.linux-x86_64.tar.bz2"
-      ff_73:
-        firefox_base_url: "https://ftp.mozilla.org/pub/devedition/releases/73.0b9/linux-x86_64/en-GB/"
-        firefox_distribution: "firefox-73.0b9.tar.bz2"
+        firefox_distribution: "firefox-77.0a1.en-US.linux-x86_64.tar.bz2"
       ff_74:
         firefox_base_url: "https://ftp.mozilla.org/pub/devedition/releases/74.0b9/linux-x86_64/en-GB/"
         firefox_distribution: "firefox-74.0b9.tar.bz2"
+      ff_75:
+        firefox_base_url: "https://ftp.mozilla.org/pub/devedition/releases/75.0b12/linux-x86_64/en-GB/"
+        firefox_distribution: "firefox-75.0b12.tar.bz2"
+      ff_76:
+        firefox_base_url: "https://ftp.mozilla.org/pub/devedition/releases/76.0b2/linux-x86_64/en-GB/"
+        firefox_distribution: "firefox-76.0b2.tar.bz2"
   steps:
   - task: NodeTool@0
     inputs:
