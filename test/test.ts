@@ -70,6 +70,12 @@ testWithTimeout('Dat Network', async (assert) => {
   assert.ok((await archive.readdir('/')).includes('index.html'));
 }, 30000);
 
+testWithTimeout('Dat2 Network', async (assert) => {
+  const archive = await api.privateApi.getArchive('dat://ccf6879e84bb5d5e9b134f9a43a2cca7d7b6c7b26c996de27e35756a406bcc66');
+  assert.ok(!(await archive.getInfo()).isOwner);
+  assert.ok((await archive.readdir('/')).includes('index.html'));
+}, 30000);
+
 
 test('Dat DNS', async (assert) => {
   const addr = await dns.resolve('dat://sammacbeth.eu');

@@ -1,5 +1,6 @@
 import { DatV1API, DatV1WebRTCLoader } from '@sammacbeth/dat-api-v1wrtc';
 import { DatV1Loader } from '@sammacbeth/dat-api-v1';
+import apiFactory, { DatV2API } from '@sammacbeth/dat2-api';
 import HyperdriveAPI from '@sammacbeth/dat-api-core/';
 import RandomAccess = require('random-access-idb-mutable-file');
 import ram = require('random-access-memory');
@@ -21,7 +22,7 @@ export interface SelectArchiveOptions {
   };
 }
 
-export type DatAPI = DatV1API;
+export type DatAPI = DatV2API;
 
 const storeName = 'IDBMutableFile';
 const mountStorage = RandomAccess.mount({
@@ -83,9 +84,51 @@ function createLoader(config: Config) {
 }
 
 export default (config: Config = DEFAULT_CONFIG) => {
-  const api = new HyperdriveAPI(createLoader(config), {
-    persist: true,
+  // const api = new HyperdriveAPI(createLoader(config), {
+  //   persist: true,
+  //   autoSwarm: true,
+  //   driveOptions: {
+  //     sparse: true,
+  //   },
+  //   swarmOptions: {
+  //     announce: config.announceEnabled,
+  //   },
+  // });
+  // // work around to make hyperdiscovery bind a random port
+  // (<any>api.loader.swarm).disc._port = undefined;
+
+  // const onChanged = (newConfig: Config) => {
+  //   if (Object.keys(config).every((k) => config[k] === newConfig[k])) {
+  //     return;
+  //   }
+  //   console.log('Config changed from', config, 'to', newConfig);
+  //   const openDats = [...api.dats.keys()];
+  //   api.shutdown();
+  //   // this is currently protected so we cast to any to avoid a compile error
+  //   (<any>api).defaultDatOptions.announce = newConfig.announceEnabled;
+  //   if (
+  //     config.wrtcEnabled !== newConfig.wrtcEnabled ||
+  //     config.uploadEnabled !== newConfig.uploadEnabled
+  //   ) {
+  //     api.loader = createLoader(newConfig);
+  //     (<any>api.loader.swarm).disc._port = undefined;
+  //   }
+  //   config = newConfig;
+  //   // reload open dats
+  //   openDats.forEach((addr) => {
+  //     api.getDat(addr, { persist: true });
+  //   });
+  // };
+  // getConfig().then(onChanged);
+  // onConfigChanged(onChanged);
+  // return api;
+  return apiFactory({
+    persistantStorageDeleter,
+    persistantStorageFactory,
+    ephemeral: true,
+  }, {
     autoSwarm: true,
+    persist: true,
     driveOptions: {
       sparse: true,
     },
@@ -93,32 +136,4 @@ export default (config: Config = DEFAULT_CONFIG) => {
       announce: config.announceEnabled,
     },
   });
-  // work around to make hyperdiscovery bind a random port
-  (<any>api.loader.swarm).disc._port = undefined;
-
-  const onChanged = (newConfig: Config) => {
-    if (Object.keys(config).every((k) => config[k] === newConfig[k])) {
-      return;
-    }
-    console.log('Config changed from', config, 'to', newConfig);
-    const openDats = [...api.dats.keys()];
-    api.shutdown();
-    // this is currently protected so we cast to any to avoid a compile error
-    (<any>api).defaultDatOptions.announce = newConfig.announceEnabled;
-    if (
-      config.wrtcEnabled !== newConfig.wrtcEnabled ||
-      config.uploadEnabled !== newConfig.uploadEnabled
-    ) {
-      api.loader = createLoader(newConfig);
-      (<any>api.loader.swarm).disc._port = undefined;
-    }
-    config = newConfig;
-    // reload open dats
-    openDats.forEach((addr) => {
-      api.getDat(addr, { persist: true });
-    });
-  };
-  getConfig().then(onChanged);
-  onConfigChanged(onChanged);
-  return api;
 };

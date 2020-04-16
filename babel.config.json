@@ -1,0 +1,11 @@
+{
+  "plugins": [
+    ["module-resolver", {
+      "alias": {
+        "sodium-native": "@geut/sodium-javascript-plus",
+        "sodium-universal": "@geut/sodium-javascript-plus",
+        "utp-native": "@sammacbeth/utp-wasm"
+      }
+    }]
+  ]
+}
