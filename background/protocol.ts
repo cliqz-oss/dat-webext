@@ -6,14 +6,15 @@ import createHandler, {
 import mime = require('mime');
 import parseUrl = require('parse-dat-url');
 import eos = require('end-of-stream');
-import { DatAPI } from './dat';
 import { DNSLookupFailed } from './errors';
 import DatDNS from './dns';
+import HyperdriveAPI from '@sammacbeth/dat-api-core';
+import { IHyperdrive } from '@sammacbeth/dat-types/lib/hyperdrive';
 
 class DatHandler {
   handler: (url: string, timeout?: number) => Promise<NodeJS.ReadableStream>;
 
-  constructor(public dns: DatDNS, public node: DatAPI) {
+  constructor(public dns: DatDNS, public node: HyperdriveAPI<IHyperdrive>) {
     this.dns = dns;
     this.node = node;
     this.handler = createHandler(this.node, (host) => dns.resolve(host));

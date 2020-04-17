@@ -22,17 +22,21 @@ export interface SelectArchiveOptions {
   };
 }
 
-export type DatAPI = DatV2API;
+export type DatAPI = DatV1API;
+export type DatAPIPair = [DatV1API, DatV2API];
 
 const storeName = 'IDBMutableFile';
-const mountStorage = RandomAccess.mount({
+const mountStorages = [RandomAccess.mount({
   name: 'dat1data',
   storeName,
-});
+}), RandomAccess.mount({
+  name: 'dat2data',
+  storeName,
+})];
 
-async function persistantStorageFactory(key) {
+async function persistantStorageFactory(ind: number, key: string) {
   try {
-    const storage = await mountStorage;
+    const storage = await mountStorages[ind];
     return (name: string) => storage(`${key}/${name}`);
   } catch (e) {
     console.warn('indexeddb mount failed, falling back to non-persistent storage', e);
@@ -40,8 +44,8 @@ async function persistantStorageFactory(key) {
   }
 }
 
-async function persistantStorageDeleter(key) {
-  const storage = await mountStorage;
+async function persistantStorageDeleter(ind: number, key: string) {
+  const storage = await mountStorages[ind];
   const tmpVol = storage('tmp');
   const db: IDBDatabase = tmpVol.volume.db;
   const transaction = db.transaction(storeName, 'readonly');
@@ -72,59 +76,58 @@ function createLoader(config: Config) {
         bootstrap: ["https://dat-signal.test.cliqz.com/"],
         simplePeer,
       },
-      persistantStorageDeleter,
-      persistantStorageFactory,
+      persistantStorageDeleter: persistantStorageDeleter.bind(undefined, 0),
+      persistantStorageFactory: persistantStorageFactory.bind(undefined, 0),
     });
   }
   return new DatV1Loader({
     autoListen: false,
-    persistantStorageDeleter,
-    persistantStorageFactory,
+    persistantStorageDeleter: persistantStorageDeleter.bind(undefined, 0),
+    persistantStorageFactory: persistantStorageFactory.bind(undefined, 0),
   });
 }
 
-export default (config: Config = DEFAULT_CONFIG) => {
-  // const api = new HyperdriveAPI(createLoader(config), {
-  //   persist: true,
-  //   autoSwarm: true,
-  //   driveOptions: {
-  //     sparse: true,
-  //   },
-  //   swarmOptions: {
-  //     announce: config.announceEnabled,
-  //   },
-  // });
-  // // work around to make hyperdiscovery bind a random port
-  // (<any>api.loader.swarm).disc._port = undefined;
+export default (config: Config = DEFAULT_CONFIG): DatAPIPair => {
+  const api = new HyperdriveAPI(createLoader(config), {
+    persist: true,
+    autoSwarm: true,
+    driveOptions: {
+      sparse: true,
+    },
+    swarmOptions: {
+      announce: config.announceEnabled,
+    },
+  });
+  // work around to make hyperdiscovery bind a random port
+  (<any>api.loader.swarm).disc._port = undefined;
 
-  // const onChanged = (newConfig: Config) => {
-  //   if (Object.keys(config).every((k) => config[k] === newConfig[k])) {
-  //     return;
-  //   }
-  //   console.log('Config changed from', config, 'to', newConfig);
-  //   const openDats = [...api.dats.keys()];
-  //   api.shutdown();
-  //   // this is currently protected so we cast to any to avoid a compile error
-  //   (<any>api).defaultDatOptions.announce = newConfig.announceEnabled;
-  //   if (
-  //     config.wrtcEnabled !== newConfig.wrtcEnabled ||
-  //     config.uploadEnabled !== newConfig.uploadEnabled
-  //   ) {
-  //     api.loader = createLoader(newConfig);
-  //     (<any>api.loader.swarm).disc._port = undefined;
-  //   }
-  //   config = newConfig;
-  //   // reload open dats
-  //   openDats.forEach((addr) => {
-  //     api.getDat(addr, { persist: true });
-  //   });
-  // };
-  // getConfig().then(onChanged);
-  // onConfigChanged(onChanged);
-  // return api;
-  return apiFactory({
-    persistantStorageDeleter,
-    persistantStorageFactory,
+  const onChanged = (newConfig: Config) => {
+    if (Object.keys(config).every((k) => config[k] === newConfig[k])) {
+      return;
+    }
+    console.log('Config changed from', config, 'to', newConfig);
+    const openDats = [...api.dats.keys()];
+    api.shutdown();
+    // this is currently protected so we cast to any to avoid a compile error
+    (<any>api).defaultDatOptions.announce = newConfig.announceEnabled;
+    if (
+      config.wrtcEnabled !== newConfig.wrtcEnabled ||
+      config.uploadEnabled !== newConfig.uploadEnabled
+    ) {
+      api.loader = createLoader(newConfig);
+      (<any>api.loader.swarm).disc._port = undefined;
+    }
+    config = newConfig;
+    // reload open dats
+    openDats.forEach((addr) => {
+      api.getDat(addr, { persist: true });
+    });
+  };
+  getConfig().then(onChanged);
+  onConfigChanged(onChanged);
+  return [api, apiFactory({
+    persistantStorageDeleter: persistantStorageDeleter.bind(undefined, 1),
+    persistantStorageFactory: persistantStorageFactory.bind(undefined, 1),
     ephemeral: true,
   }, {
     autoSwarm: true,
@@ -134,6 +137,7 @@ export default (config: Config = DEFAULT_CONFIG) => {
     },
     swarmOptions: {
       announce: config.announceEnabled,
+      upload: config.uploadEnabled,
     },
-  });
+  })];
 };

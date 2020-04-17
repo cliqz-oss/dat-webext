@@ -1,4 +1,4 @@
-import { DatAPI } from './dat';
+import { DatAPI, DatAPIPair } from './dat';
 import { EventEmitter } from 'events';
 import DatDb, { IDatInfo } from './db';
 
@@ -9,15 +9,17 @@ const DEFAULT_SEED_TIME = 1e3 * 60 * 5; // 5 mins
 
 export default class DatLibrary {
 
-  api: DatAPI
+  api: DatAPIPair
   db: DatDb
 
-  constructor(db: DatDb, node: DatAPI) {
+  constructor(db: DatDb, node: DatAPIPair) {
     this.db = db;
     this.api = node;
 
-    this.api.on('use', (dat) => {
-      this.db.updateDat(dat, DEFAULT_SEED_TIME);
+    this.api.forEach((n) => {
+      n.on('use', (dat) => {
+        this.db.updateDat(dat, DEFAULT_SEED_TIME);
+      });
     });
   }
 
@@ -35,23 +37,38 @@ export default class DatLibrary {
     })
   }
 
+  isOpen(key: string) {
+    return this.api.some((n) => n.dats.has(key));
+  }
+
+  isSwarming(key: string) {
+    return this.api.some((n) => n.dats.has(key) && n.dats.get(key).isSwarming);
+  }
+
   closeArchive(key: string) {
-    const dat = this.api.dats.get(key);
-    if (dat && dat.isSwarming) {
-      dat.close();
-    }
-    if (this.api.dats.size === 0) {
-      console.log('shutdown node');
-      this.api.shutdown();
-    }
+    this.api.forEach((api) => {
+      const dat = api.dats.get(key);
+      if (dat && dat.isSwarming) {
+        dat.close();
+      }
+      if (api.dats.size === 0) {
+        console.log('shutdown node');
+        api.shutdown();
+      }
+    })
   }
 
   async deleteArchive(key: string) {
-    const dat = this.api.dats.get(key);
-    if (dat && dat.isSwarming) {
-      throw 'Cannot delete an open archive';
+    for (const api of this.api) {
+      const dat = api.dats.get(key);
+      if (!dat) {
+        continue;
+      }
+      if (dat && dat.isSwarming) {
+        throw 'Cannot delete an open archive';
+      }
+      await api.deleteDatData(key);
     }
-    await this.api.deleteDatData(key);
     await this.db.library.delete(key);
   }
 }
