@@ -1,0 +1,10 @@
+diff --git a/node_modules/mountable-hypertrie/index.js b/node_modules/mountable-hypertrie/index.js
+index 7f1515b..aa3cfdb 100644
+--- a/node_modules/mountable-hypertrie/index.js
++++ b/node_modules/mountable-hypertrie/index.js
+@@ -1,4 +1,4 @@
+-const p = require('path').posix
++const p = require('path')
+ const { EventEmitter } = require('events')
+ 
+ const hypertrie = require('hypertrie')
