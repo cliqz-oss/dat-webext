@@ -31,8 +31,8 @@ const node = nodeFactory({
 const db = new DatDb();
 const library = new DatLibrary(db, node);
 const dns = new DatDNS(db);
-const protocolHandler = new DatHandler(dns, node);
-const api = new DatApi(node, dns, library, { disablePrompts: true });
+const protocolHandler = new DatHandler(dns, node[0]);
+const api = new DatApi(node[0], dns, library, { disablePrompts: true });
 browser.protocol.registerProtocol('dat', (request) => {
   return protocolHandler.handleRequest(request);
 });
@@ -70,6 +70,18 @@ testWithTimeout('Dat Network', async (assert) => {
   assert.ok((await archive.readdir('/')).includes('index.html'));
 }, 30000);
 
+testWithTimeout('Dat2 Network', async (assert) => {
+  const dat = await node[1].getDat('ccf6879e84bb5d5e9b134f9a43a2cca7d7b6c7b26c996de27e35756a406bcc66');
+  await dat.ready;
+  assert.ok(!dat.drive.writable);
+  const files: string[] = await new Promise((resolve, reject) => {
+    dat.drive.readdir('/', (err, files) => {
+      if (err) return reject(err);
+      resolve(files);
+    })
+  });
+  assert.ok(files.includes('index.html'));
+}, 30000);
 
 test('Dat DNS', async (assert) => {
   const addr = await dns.resolve('dat://sammacbeth.eu');

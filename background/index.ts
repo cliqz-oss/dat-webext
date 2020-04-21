@@ -4,14 +4,15 @@ import DatApi from './api';
 import DatDb from './db';
 import nodeFactory from './dat';
 import DatDNS from './dns';
-import Experiment from './experiment';
 import { getConfig, setConfig } from './config';
 
 const node = nodeFactory();
 const db = new DatDb();
 const library = new DatLibrary(db, node);
 const dns = new DatDNS(db);
-const protocolHandler = new DatHandler(dns, node);
+const protocolHandler = new DatHandler(dns, node[0]);
+// TODO: Separate dns handling for hyper:
+const hyperHandler = new DatHandler(dns, node[1]);
 
 browser.processScript.setAPIScript(browser.runtime.getURL('web-api.js'));
 
@@ -24,11 +25,18 @@ win.getConfig = getConfig;
 win.setConfig = setConfig;
 
 window.addEventListener('beforeunload', () => {
-  node.shutdown();
+  node.forEach(n => n.shutdown());
 });
 
 browser.protocol.registerProtocol('dat', (request) => {
   return protocolHandler.handleRequest(request);
+});
+browser.protocol.registerProtocol('hyper', (request) => {
+  // due to URL parser issues we have to pretend the protocol is dat:
+  // so that parse-dat-url correctly extracts the address
+  return hyperHandler.handleRequest({
+    url: `dat:${request.url.slice(6)}`,
+  });
 });
 
 // Handler for messages from other contexts
@@ -48,7 +56,7 @@ browser.runtime.onMessage.addListener((message, sender) => {
   }
 });
 
-const api = new DatApi(node, dns, library);
+const api = new DatApi(node[0], dns, library);
 win.api = api;
 
 library.db.library
@@ -56,7 +64,7 @@ library.db.library
   .above(0)
   .each(({ key }) => {
     console.log('load', key);
-    node.getDat(key, { persist: true });
+    node[0].getDat(key, { persist: true });
   });
 
 // manage open archives
@@ -76,8 +84,7 @@ setInterval(async () => {
   archives
     .filter(
       (a) =>
-        library.api.dats.has(a.key) &&
-        library.api.dats.get(a.key).isSwarming &&
+        library.isSwarming(a.key) &&
         a.seedUntil < Date.now() &&
         !a.isOwner &&
         a.seedingMode === 0 &&
@@ -94,7 +101,7 @@ setInterval(async () => {
   // prune data
   if (totalUsage > CACHE_SIZE_MB) {
     const pruneable = archives
-      .filter((a) => !library.api.dats.has(a.key) && !a.isOwner && !activeStreams.has(a.key))
+      .filter((a) => !library.isOpen(a.key) && !a.isOwner && !activeStreams.has(a.key))
       .sort((a, b) => a.lastUsed - b.lastUsed);
     if (pruneable.length > 0) {
       console.log('prune archive', pruneable[0].key);
@@ -103,6 +110,6 @@ setInterval(async () => {
   }
 }, 60000);
 
-const experiment = new Experiment(node);
-experiment.start();
-win.experiment = experiment;
+// const experiment = new Experiment(node);
+// experiment.start();
+// win.experiment = experiment;

@@ -1,5 +1,6 @@
 import { DatV1API, DatV1WebRTCLoader } from '@sammacbeth/dat-api-v1wrtc';
 import { DatV1Loader } from '@sammacbeth/dat-api-v1';
+import apiFactory, { DatV2API } from '@sammacbeth/dat2-api';
 import HyperdriveAPI from '@sammacbeth/dat-api-core/';
 import RandomAccess = require('random-access-idb-mutable-file');
 import ram = require('random-access-memory');
@@ -22,16 +23,20 @@ export interface SelectArchiveOptions {
 }
 
 export type DatAPI = DatV1API;
+export type DatAPIPair = [DatV1API, DatV2API];
 
 const storeName = 'IDBMutableFile';
-const mountStorage = RandomAccess.mount({
+const mountStorages = [RandomAccess.mount({
   name: 'dat1data',
   storeName,
-});
+}), RandomAccess.mount({
+  name: 'dat2data',
+  storeName,
+})];
 
-async function persistantStorageFactory(key) {
+async function persistantStorageFactory(ind: number, key: string) {
   try {
-    const storage = await mountStorage;
+    const storage = await mountStorages[ind];
     return (name: string) => storage(`${key}/${name}`);
   } catch (e) {
     console.warn('indexeddb mount failed, falling back to non-persistent storage', e);
@@ -39,8 +44,8 @@ async function persistantStorageFactory(key) {
   }
 }
 
-async function persistantStorageDeleter(key) {
-  const storage = await mountStorage;
+async function persistantStorageDeleter(ind: number, key: string) {
+  const storage = await mountStorages[ind];
   const tmpVol = storage('tmp');
   const db: IDBDatabase = tmpVol.volume.db;
   const transaction = db.transaction(storeName, 'readonly');
@@ -71,18 +76,18 @@ function createLoader(config: Config) {
         bootstrap: ["https://dat-signal.test.cliqz.com/"],
         simplePeer,
       },
-      persistantStorageDeleter,
-      persistantStorageFactory,
+      persistantStorageDeleter: persistantStorageDeleter.bind(undefined, 0),
+      persistantStorageFactory: persistantStorageFactory.bind(undefined, 0),
     });
   }
   return new DatV1Loader({
     autoListen: false,
-    persistantStorageDeleter,
-    persistantStorageFactory,
+    persistantStorageDeleter: persistantStorageDeleter.bind(undefined, 0),
+    persistantStorageFactory: persistantStorageFactory.bind(undefined, 0),
   });
 }
 
-export default (config: Config = DEFAULT_CONFIG) => {
+export default (config: Config = DEFAULT_CONFIG): DatAPIPair => {
   const api = new HyperdriveAPI(createLoader(config), {
     persist: true,
     autoSwarm: true,
@@ -120,5 +125,19 @@ export default (config: Config = DEFAULT_CONFIG) => {
   };
   getConfig().then(onChanged);
   onConfigChanged(onChanged);
-  return api;
+  return [api, apiFactory({
+    persistantStorageDeleter: persistantStorageDeleter.bind(undefined, 1),
+    persistantStorageFactory: persistantStorageFactory.bind(undefined, 1),
+    ephemeral: true,
+  }, {
+    autoSwarm: true,
+    persist: true,
+    driveOptions: {
+      sparse: true,
+    },
+    swarmOptions: {
+      announce: config.announceEnabled,
+      upload: config.uploadEnabled,
+    },
+  })];
 };
