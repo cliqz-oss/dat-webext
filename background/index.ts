@@ -76,7 +76,14 @@ setInterval(async () => {
   const tabs = await browser.tabs.query({});
   const openDatUrls = new Set(
     await Promise.all(
-      tabs.filter(({ url }) => url.startsWith('dat://')).map(({ url }) => dns.resolve(url)),
+      tabs
+        .filter(({ url }) => url.startsWith('dat://') || url.startsWith('hyper://'))
+        .map(({ url }) => {
+          if (url.startsWith('hyper://')) {
+            return url;
+          }
+          return dns.resolve(url);
+        }),
     ),
   );
 
