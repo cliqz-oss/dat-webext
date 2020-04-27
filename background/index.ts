@@ -110,6 +110,3 @@ setInterval(async () => {
   }
 }, 60000);
 
-// const experiment = new Experiment(node);
-// experiment.start();
-// win.experiment = experiment;
