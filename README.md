@@ -18,11 +18,13 @@ Run with [web-ext](https://github.com/mozilla/web-ext) (requires [Firefox Develo
 npm run start
 ```
 
-or, run in an existing firefox profile:
- * Disable the content sandbox (required for experimental APIs): In `about:config`, set the `security.sandbox.content.level` pref to `2`.
- * Enable the `extensions.experiments.enabled` preference in `about:config`
- * Go to `about:debugging`
- * Select 'Load Temporary Add-on', and select `addon/manifest.json` from this repository.
+## Install in Firefox
+
+You will need [Firefox Developer Edition](https://www.mozilla.org/en-US/firefox/developer/) or [Nightly](https://www.mozilla.org/en-US/firefox/channel/desktop/). Other Firefox releases do not allow unsigned extensions to be installed.
+
+ 1. Go to `about:config` and set the pref `xpinstall.signatures.required` to `false` and `extensions.experiments.enabled` to `true`.
+ 2. Download the [latest version](https://github.com/cliqz-oss/dat-webext/releases/download/v0.2.1/dat_protocol-0.2.1.zip) of the extension.
+ 3. Go to `about:addons` and choose 'Install addon from file' from the cog menu in the top right, then browse to zip file you just downloaded. The browser will ask for permissions to install.
 
 ## License
 
