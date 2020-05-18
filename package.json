@@ -19,7 +19,7 @@
     "@cliqz-oss/dexie": "^2.0.4",
     "@geut/sodium-javascript-plus": "0.0.5",
     "@sammacbeth/dat-api-core": "0.6.0",
-    "@sammacbeth/dat-api-v1": "0.6.0",
+    "@sammacbeth/dat-api-v1": "0.6.1",
     "@sammacbeth/dat-api-v1wrtc": "0.6.0",
     "@sammacbeth/dat-archive": "0.6.0",
     "@sammacbeth/dat-protocol-handler": "0.6.0",
