@@ -71,7 +71,7 @@ testWithTimeout('Dat Network', async (assert) => {
 }, 30000);
 
 testWithTimeout('Dat2 Network', async (assert) => {
-  const dat = await node[1].getDat('ccf6879e84bb5d5e9b134f9a43a2cca7d7b6c7b26c996de27e35756a406bcc66');
+  const dat = await node[1].getDat('a8109b835d27c30ad4d55b321dd7c4032c037eaf1f6f2b00de7b03b5a6cc504a');
   await dat.ready;
   assert.ok(!dat.drive.writable);
   const files: string[] = await new Promise((resolve, reject) => {

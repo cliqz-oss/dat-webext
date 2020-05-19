@@ -17,14 +17,14 @@
   "license": "MIT",
   "dependencies": {
     "@cliqz-oss/dexie": "^2.0.4",
-    "@geut/sodium-javascript-plus": "0.0.5",
-    "@sammacbeth/dat-api-core": "0.6.0",
-    "@sammacbeth/dat-api-v1": "0.6.0",
-    "@sammacbeth/dat-api-v1wrtc": "0.6.0",
-    "@sammacbeth/dat-archive": "0.6.0",
-    "@sammacbeth/dat-protocol-handler": "0.6.0",
-    "@sammacbeth/dat-types": "^0.6.0",
-    "@sammacbeth/dat2-api": "0.6.0",
+    "@geut/sodium-javascript-plus": "0.0.6",
+    "@sammacbeth/dat-api-core": "0.7.0",
+    "@sammacbeth/dat-api-v1": "0.7.0",
+    "@sammacbeth/dat-api-v1wrtc": "0.7.0",
+    "@sammacbeth/dat-archive": "0.7.0",
+    "@sammacbeth/dat-protocol-handler": "0.7.0",
+    "@sammacbeth/dat-types": "^0.7.0",
+    "@sammacbeth/dat2-api": "0.7.0",
     "@sammacbeth/libdweb": "0.0.13",
     "@sammacbeth/utp-wasm": "^1.1.5",
     "base64-js": "^1.3.1",
@@ -50,7 +50,7 @@
     "patch-package": "^6.2.2",
     "tsify": "^4.0.1",
     "typescript": "^3.8.3",
-    "web-ext": "^4.1.0",
+    "web-ext": "^4.2.0",
     "web-ext-types": "^3.2.1"
   }
 }
