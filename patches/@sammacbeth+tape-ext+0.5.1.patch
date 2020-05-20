@@ -15,7 +15,7 @@ index 8b7544d..2b3e1db 100755
            setTimeout(() => {
              driver.get('dat://dat-archive-test.hashbase.io');
 -          }, 1000);
-+          }, 5000);
++          }, 10000);
            break
          }
        }
