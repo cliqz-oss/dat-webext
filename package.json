@@ -22,7 +22,7 @@
     "@sammacbeth/dat-api-v1": "0.6.0",
     "@sammacbeth/dat-api-v1wrtc": "0.6.0",
     "@sammacbeth/dat-archive": "0.6.0",
-    "@sammacbeth/dat-protocol-handler": "0.6.0",
+    "@sammacbeth/dat-protocol-handler": "0.7.0",
     "@sammacbeth/dat-types": "^0.6.0",
     "@sammacbeth/dat2-api": "0.6.0",
     "@sammacbeth/libdweb": "0.0.13",
