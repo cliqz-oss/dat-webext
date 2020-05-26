@@ -1,6 +1,6 @@
 {
   "name": "dat-webext",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "",
   "scripts": {
     "build:test": "browserify -r fs:graceful-fs -e test/test.ts -p tsify -g @sammacbeth/libdwebify -t [ babelify --global ] > test/test-bundle.js && browserify -e ./web-api/web-api.js > test/web-api.js",
