@@ -1,0 +1,13 @@
+diff --git a/node_modules/is-generator-function/index.js b/node_modules/is-generator-function/index.js
+index 306a299..cb03167 100644
+--- a/node_modules/is-generator-function/index.js
++++ b/node_modules/is-generator-function/index.js
+@@ -10,7 +10,7 @@ var getGeneratorFunc = function () { // eslint-disable-line consistent-return
+ 		return false;
+ 	}
+ 	try {
+-		return Function('return function*() {}')();
++		return function*() {};
+ 	} catch (e) {
+ 	}
+ };
