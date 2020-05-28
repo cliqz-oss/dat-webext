@@ -31,7 +31,7 @@
     "bulma": "^0.8.2",
     "dat-dns": "^4.1.2",
     "end-of-stream": "^1.4.4",
-    "mime": "^2.4.5",
+    "mime": "^2.4.6",
     "parse-dat-url": "^3.0.3",
     "random-access-idb": "^1.2.1",
     "random-access-idb-mutable-file": "^0.3.0",
