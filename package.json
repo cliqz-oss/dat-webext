@@ -50,7 +50,7 @@
     "patch-package": "^6.2.2",
     "tsify": "^4.0.1",
     "typescript": "^3.8.3",
-    "web-ext": "^4.2.0",
+    "web-ext": "^5.2.0",
     "web-ext-types": "^3.2.1"
   }
 }
