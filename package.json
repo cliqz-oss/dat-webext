@@ -27,7 +27,7 @@
     "@sammacbeth/dat2-api": "0.8.1",
     "@sammacbeth/libdweb": "0.0.13",
     "@sammacbeth/utp-wasm": "^1.1.5",
-    "base64-js": "^1.3.1",
+    "base64-js": "^1.5.1",
     "bulma": "^0.8.2",
     "dat-dns": "^4.1.2",
     "end-of-stream": "^1.4.4",
