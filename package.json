@@ -35,7 +35,7 @@
     "parse-dat-url": "^3.0.3",
     "random-access-idb": "^1.2.1",
     "random-access-idb-mutable-file": "^0.3.0",
-    "random-access-memory": "^3.1.1",
+    "random-access-memory": "^3.1.2",
     "spanan": "^2.1.0"
   },
   "devDependencies": {
